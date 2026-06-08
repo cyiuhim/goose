@@ -1,4 +1,6 @@
 goose
 **/*.d
 **/*.o
+build/
+tests/lexer_test
 .vscode/

@@ -13,7 +13,7 @@ enum TokenType {
     FUNC_AT, // function at symbol, @
     COMMENT, // comment
     SPACES, // one or more spaces
-    QUOTE, // wrapped inside a pair of double quotes
+    STRING_LITERAL, // wrapped inside a pair of double quotes
     COMMA, // ,
 
     // keywords

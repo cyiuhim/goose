@@ -1,5 +1,3 @@
-cd src
-make clean
-make
-cd ..
-sudo cp ./goose /usr/local/bin
+cmake -S . -B build
+cmake --build build
+sudo cmake --install build --prefix /usr/local

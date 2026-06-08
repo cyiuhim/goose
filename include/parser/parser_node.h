@@ -6,7 +6,7 @@
 
 class ParserNode {
     SymbolType symbol_type;
-
-}
+    std::vector<std::unique_ptr<ParserNode>> children;
+};
 
 #endif 

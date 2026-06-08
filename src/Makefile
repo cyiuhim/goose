@@ -1,7 +1,7 @@
 CXX=g++
 CXXFLAGS= -std=c++20 -Wall -g -MMD
 EXEC=../goose
-INCLUDES=-I. -Ilexer
+INCLUDES=-I../include -I../include/lexer -I../include/parser
 
 CPPFILES=$(wildcard *.cpp)
 OBJECTS=${CPPFILES:.cpp=.o}

@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <filesystem>
-#include "../src/lexer/dfa.h"
-#include "../src/lexer/token.h"
-#include "../src/lexer/state.h"
+#include <lexer/dfa.h>
+#include <lexer/token.h>
+#include <lexer/state.h>
 
 namespace fs = std::filesystem;
 
@@ -209,7 +209,7 @@ TEST_F(DFATest, RecognizeQuotedString) {
     
     bool found_quote = false;
     for (const auto& token : tokens) {
-        if (token.first == QUOTE) {
+        if (token.first == STRING_LITERAL) {
             found_quote = true;
             break;
         }

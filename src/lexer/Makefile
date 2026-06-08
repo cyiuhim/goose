@@ -1,6 +1,6 @@
 CXX=g++ 
 CXXFLAGS= -std=c++20 -Wall -g -MMD
-INCLUDES= 
+INCLUDES=-I../../include -I../../include/lexer
 
 CPPFILES=${wildcard *.cpp}
 OBJFILES=${CPPFILES:.cpp=.o}
@@ -13,7 +13,7 @@ all: ${OBJ}
 ${OBJ}: ${OBJFILES}
 	${CXX} -r $^ -o $@
 
-%.o: %.cc 
+%.o: %.cpp 
 	${CXX} ${CXXFLAGS} ${INCLUDES} -c $< -o $@
 
 -include ${DEPENDS}

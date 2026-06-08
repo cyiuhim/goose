@@ -123,6 +123,6 @@ void DFA::add_keywords(std::vector<std::pair<std::string, TokenType>> keywords) 
 DFA::DFA() : start_state{&empty_state} {
     populate_state_list();
     populate_alphabet(goose_alphabet);
-    add_accepting_states(goose_state_map);
+    add_accepting_states(goose_accepting_state_map);
     add_keywords(goose_keywords);
 }

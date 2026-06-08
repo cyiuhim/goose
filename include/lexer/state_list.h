@@ -98,7 +98,7 @@ void populate_state_list();
 
 inline std::string goose_alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_#<>.,@= \n\t\r'\"";
 
-inline std::vector<std::pair<State*, TokenType>> goose_state_map = {
+inline std::vector<std::pair<State*, TokenType>> goose_accepting_state_map = {
     {&comment_state, COMMENT},
     {&langle2_state, PARAM_OPEN_PARAN},
     {&rangle2_state, PARAM_CLOSE_PARAN},
@@ -108,7 +108,7 @@ inline std::vector<std::pair<State*, TokenType>> goose_state_map = {
     {&number_state, NUMBER},
     {&at_state, FUNC_AT}, 
     {&period_state, PERIOD},
-    {&quote_end_state, QUOTE},
+    {&quote_end_state, STRING_LITERAL},
     {&comma_state, COMMA}
 };
 
