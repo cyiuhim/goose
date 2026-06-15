@@ -18,7 +18,6 @@ enum TokenType {
 
     // keywords
     FLAP, // flap (let)
-    HONK, // honk
     START, // start
     END, // end
 };
