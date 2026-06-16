@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
         std::cerr << e.what() << std::endl;
         return 2;
     }
-    auto tokens = dfa.get_result();
+    Tokens tokens = dfa.get_result();
     
     return 0;
 }

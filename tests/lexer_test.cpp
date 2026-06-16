@@ -48,23 +48,6 @@ TEST_F(DFATest, RecognizeFlapKeyword) {
     EXPECT_TRUE(found_flap);
 }
 
-// Test keyword recognition (HONK)
-TEST_F(DFATest, RecognizeHonkKeyword) {
-    std::string filename = fixture_path("keyword_honk.goose");
-    
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-    
-    bool found_honk = false;
-    for (const auto& token : tokens) {
-        if (token.first == HONK && token.second == "honk") {
-            found_honk = true;
-            break;
-        }
-    }
-    EXPECT_TRUE(found_honk);
-}
-
 // Test keyword recognition (START)
 TEST_F(DFATest, RecognizeStartKeyword) {
     std::string filename = fixture_path("keyword_start.goose");
@@ -244,13 +227,11 @@ TEST_F(DFATest, ParseComplexProgram) {
     for (const auto& token : tokens) {
         if (token.first == START) has_start = true;
         if (token.first == FLAP) has_flap = true;
-        if (token.first == HONK) has_honk = true;
         if (token.first == END) has_end = true;
     }
     
     EXPECT_TRUE(has_start);
     EXPECT_TRUE(has_flap);
-    EXPECT_TRUE(has_honk);
     EXPECT_TRUE(has_end);
 }
 

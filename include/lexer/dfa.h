@@ -11,7 +11,7 @@ class DFA {
 public: 
     DFA();
     void parse (std::string file_name);
-    std::vector<std::pair<TokenType, std::string>> get_result();
+    Tokens get_result();
 
 private:
     void process_identifiers();
@@ -22,7 +22,7 @@ private:
     void add_accepting_states(std::vector<std::pair<State*, TokenType>>);
     void add_keywords(std::vector<std::pair<std::string, TokenType>>);
 
-    std::vector<std::pair<TokenType, std::string>> tokens;
+    Tokens tokens;
     std::set<char> alphabet;
     State* start_state;
     std::set<State*> states;

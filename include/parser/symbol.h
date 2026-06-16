@@ -1,12 +1,11 @@
 #ifndef __SYMBOL_H__
 #define __SYMBOL_H__
 
-#include <set>
 #include <string>
-#include <unordered_set>
+#include <vector>
 
 enum SymbolType {
-    START,
+    ROOT,
     FUNC_DFNS,
     FUNC_DFN,
     STATEMENTS,
@@ -24,23 +23,30 @@ enum SymbolType {
     // end of non-terminals 
     END_NON_TERMINALS,
 
+    EPSILON,
     IDENTIFIER,
-    START,
-    END,
-    ASSIGN,
-    EQUALS,
     NUMBER,
+    ASSIGN,
     PERIOD,
-    COMMA,
     PARAM_OPEN_PAREN,
     PARAM_CLOSE_PAREN,
-    FLAP,
     FUNC_AT,
     STRING_LITERAL,
+    COMMA,
+    FLAP,
+    START,
+    END,
+    
+    // special $ character
+    END_SYMBOL,
 
     // end of symbol type 
     END_ENUM
 };
+
+constexpr inline const bool is_valid_symbol(SymbolType st) {
+    return st != END_NON_TERMINALS && st != END_ENUM;
+}
 
 constexpr inline const bool is_terminal(SymbolType st) {
     return st > SymbolType::END_NON_TERMINALS;

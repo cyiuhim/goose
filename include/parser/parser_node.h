@@ -4,8 +4,9 @@
 #include <memory>
 #include "symbol.h"
 
-class ParserNode {
+struct ParserNode {
     SymbolType symbol_type;
+    std::optional<std::string> lexeme;
     std::vector<std::unique_ptr<ParserNode>> children;
 };
 

@@ -22,4 +22,6 @@ enum TokenType {
     END, // end
 };
 
+typedef std::vector<std::pair<TokenType, std::string>> Tokens;
+
 #endif 

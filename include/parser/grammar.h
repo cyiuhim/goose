@@ -1,25 +1,26 @@
 #ifndef __GRAMMAR_H__
 #define __GRAMMAR_H__
 
-#include <map>
 #include "symbol.h"
 
-typedef std::map<SymbolType, std::vector<Expansion>> Grammar;
+#include <unordered_map>
+
+typedef std::unordered_map<SymbolType, std::vector<Expansion>> Grammar;
 
 Grammar goose_grammar = {
-    {START, {
+    {ROOT, {
         {FUNC_DFNS}
-    }}, 
+    }},
     {FUNC_DFNS, {
         {FUNC_DFN, FUNC_DFNS}, 
-        {}
+        {EPSILON}
     }},
     {FUNC_DFN, {
         {START, FUNC_AT, IDENTIFIER, FUNC_AT, STATEMENTS, END, FUNC_AT, IDENTIFIER, FUNC_AT}
     }},
     {STATEMENTS, {
         {STATEMENT, STATEMENTS}, 
-        {}
+        {EPSILON}
     }},
     {STATEMENT, {
         {RAW_STATEMENT, PERIOD}
@@ -30,10 +31,10 @@ Grammar goose_grammar = {
         {FUNC_CALL_STATEMENT}
     }},
     {DECLARE_STATEMENT, {
-        {FLAP, IDENTIFIER, EQUALS, EXPR}
+        {FLAP, IDENTIFIER, ASSIGN, EXPR}
     }},
     {ASSIGN_STATEMENT, {
-        {IDENTIFIER, EQUALS, EXPR}
+        {IDENTIFIER, ASSIGN, EXPR}
     }}, 
     {FUNC_CALL_STATEMENT, {
         {IDENTIFIER, PARAM_OPEN_PAREN, PARAMS, PARAM_CLOSE_PAREN}
@@ -49,7 +50,7 @@ Grammar goose_grammar = {
     }},
     {PARAMS, {
         {PARAM, COMMA, PARAMS}, 
-        {}
+        {EPSILON}
     }},
     {PARAM, {
         {STRING_LITERAL},
