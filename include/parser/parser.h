@@ -26,6 +26,7 @@ private:
 
     void separate_symbols();
 
+    void compute_epsilon_reachable(const Grammar& grammar);
     void compute_first_table(const Grammar& grammar);
     void compute_follow_table(const Grammar& grammar);
 
@@ -34,8 +35,12 @@ private:
     // member variables 
     const Grammar& grammar;
 
+   
     std::unordered_set<SymbolType> non_terminals;
     std::unordered_set<SymbolType> terminals;
+
+     /* all the non-terminals that can derive epsilon */
+    std::unordered_set<SymbolType> epsilon_reachable;
 
     SymbolMappingTable first_table;
     SymbolMappingTable follow_table;
