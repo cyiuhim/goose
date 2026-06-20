@@ -8,7 +8,7 @@
 typedef std::unordered_map<SymbolType, std::vector<Expansion>> Grammar;
 
 Grammar goose_grammar = {
-    {ROOT, {
+    {START_SYMBOL, {
         {FUNC_DFNS}
     }},
     {FUNC_DFNS, {

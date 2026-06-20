@@ -5,7 +5,7 @@
 #include <vector>
 
 enum SymbolType {
-    ROOT,
+    START_SYMBOL,
     FUNC_DFNS,
     FUNC_DFN,
     STATEMENTS,

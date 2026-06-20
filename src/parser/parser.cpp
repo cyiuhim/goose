@@ -68,6 +68,8 @@ void LLParser::compute_epsilon_reachable(const Grammar& grammar) {
 /* 
  * compute the first table, with keys X, non-terminals, and value FIRST(X)
  * FIRST(X) is the set of first terminals of all strings that can be derived from X, where X is non-terminal
+ * 
+ * PRE: compute_epsilon_reachable is called 
  */
 void LLParser::compute_first_table(const Grammar& grammar) {
     
@@ -89,7 +91,7 @@ void LLParser::compute_first_table(const Grammar& grammar) {
     SymbolMappingTable prev_first_table;
     do {
         prev_first_table = first_table;
-        for (const auto& non_terminal : non_terminals) {
+        for (const auto non_terminal : non_terminals) {
             if (!grammar.contains(non_terminal)) continue;
             
             const auto& cur_expansions = grammar.at(non_terminal);
@@ -112,8 +114,74 @@ void LLParser::compute_first_table(const Grammar& grammar) {
     } while (prev_first_table != first_table);
 }
 
+/* 
+ * compute the follow table, with keys X, non-terminals, and values FOLLOW(X)
+ * FOLLOW(X) is the set of all terminals that can immediately follow X 
+ * 
+ * PRE: compute_first_table is called 
+ */
 void LLParser::compute_follow_table(const Grammar& grammar) {
-    // TODO
+    
+    // use a fixpoint method: start with empty table 
+    // continue to expand the follow table until it cannot be expanded anymore 
+
+    // rule 1: if X is the start symbol then FOLLOW(X) = {$}, just the end symbol 
+    // rule 2: if X -> a B c where c is a terminal then we add c to the FOLLOW(B)
+    // rule 3: if X -> a B Y1 Y2 ... Yn where all of Y1 to Yn can lead to epsilon then we include FOLLOW(X) to FOLLOW(B)
+
+    for (const auto non_terminal : non_terminals) {
+        follow_table[non_terminal] = {};
+    }
+
+    // rule 1
+    follow_table[START_SYMBOL] = {END_SYMBOL};
+    
+    SymbolMappingTable prev_follow_table;
+    do {
+        prev_follow_table = follow_table;
+        for (const auto& [non_terminal, expansions] : grammar) {
+            for (const auto& expansion : expansions) {
+                for (int cur_idx = 0; cur_idx < expansion.size(); cur_idx++) {
+                    const SymbolType cur_st = expansion[cur_idx];
+
+                    // we only consider the case where cur_st is a nonterminal 
+                    if (is_terminal(cur_st)) continue;
+
+                    // checking if rule 3 can be applied while going through the symbols after cur_st
+                    bool can_follow_empty = true;
+                    for (int follow_idx = cur_idx + 1; follow_idx < expansion.size(); follow_idx++) {
+                        const SymbolType follow_st = expansion[follow_idx];
+
+                        // rule 2
+                        if (is_terminal(follow_st)) {
+                            follow_table[cur_st].insert(follow_st);
+                            can_follow_empty = false;
+                            break;
+                        }
+
+                        // adding everything from FIRST(follow_st) to FOLLOW(cur_st), since everything between cur_st and follow_st can be derived to epsilon
+                        for (const auto first_st : first_table[follow_st]) {
+                            if (first_st == EPSILON) continue;
+                            follow_table[cur_st].insert(first_st);
+                        }
+
+                        // if the follow_st cannot reach epsilon then we don't have to care what comes after 
+                        // terminal after cur_st can only be derived by anything on or before follow_st
+                        if (!epsilon_reachable.contains(follow_st)) {
+                            can_follow_empty = false;
+                            break;
+                        }
+                    }
+                    if (can_follow_empty) {
+                        // that means non_terminal -> (something) cur_st (list of nonterminals that can all reach epsilon)
+                        for (const auto follow_st : prev_follow_table[non_terminal]) {
+                            follow_table[cur_st].insert(follow_st);
+                        }
+                    }
+                }
+            }
+        }
+    } while (prev_follow_table != follow_table);
 }
 
 void LLParser::compute_parser_table() {
