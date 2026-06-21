@@ -1,3 +1,10 @@
+/* 
+ * honk!
+ * references: https://www.geeksforgeeks.org/compiler-design/construction-of-ll1-parsing-table/ 
+ * 
+ */
+
+#include <iostream>
 #include <parser/parser.h>
 
 namespace {
@@ -8,11 +15,19 @@ namespace {
         }
         return true;
     }
+
+    void insert_into_parser_table(ParserTable& parser_table, SymbolType non_terminal, SymbolType terminal, const std::pair<SymbolType, Expansion>& grammar_rule) {
+        if (parser_table.contains({non_terminal, terminal})) {
+            std::cerr << "Parser table already contains entry at: {" << non_terminal << ", " << terminal << "}" << std::endl;
+            throw std::runtime_error("Parser error");
+        }
+        parser_table[{non_terminal, terminal}] = grammar_rule;
+    }
 }
 
 LLParser::LLParser(const Grammar& grammar) : grammar{grammar} {
     separate_symbols();
-    compute_tables(grammar);
+    compute_tables();
 }
 
 void LLParser::parse(const Tokens& tokens) {
@@ -32,11 +47,11 @@ void LLParser::separate_symbols() {
     }
 }
 
-void LLParser::compute_tables(const Grammar& grammar) {
+void LLParser::compute_tables() {
     // PRE: separate_symbols are called 
-    compute_epsilon_reachable(grammar);
-    compute_first_table(grammar);
-    compute_follow_table(grammar);
+    compute_epsilon_reachable();
+    compute_first_table();
+    compute_follow_table();
     compute_parser_table();
 }
 
@@ -44,7 +59,7 @@ void LLParser::compute_tables(const Grammar& grammar) {
  * compute all the non-terminals that can derive epsilon 
  * PRE: separate_symbols is called 
  */
-void LLParser::compute_epsilon_reachable(const Grammar& grammar) {
+void LLParser::compute_epsilon_reachable() {
     
     // use a fixpoint method: start with an empty set of non-terminals,
     // then go through each production rule and see if epsilon can be reached 
@@ -71,7 +86,7 @@ void LLParser::compute_epsilon_reachable(const Grammar& grammar) {
  * 
  * PRE: compute_epsilon_reachable is called 
  */
-void LLParser::compute_first_table(const Grammar& grammar) {
+void LLParser::compute_first_table() {
     
     // use a fixpoint method: start with empty table 
     // then go through each non-terminal and see what terminals can be the first terminal out of any string derived from the non-terminal
@@ -120,7 +135,7 @@ void LLParser::compute_first_table(const Grammar& grammar) {
  * 
  * PRE: compute_first_table is called 
  */
-void LLParser::compute_follow_table(const Grammar& grammar) {
+void LLParser::compute_follow_table() {
     
     // use a fixpoint method: start with empty table 
     // continue to expand the follow table until it cannot be expanded anymore 
@@ -184,8 +199,49 @@ void LLParser::compute_follow_table(const Grammar& grammar) {
     } while (prev_follow_table != follow_table);
 }
 
+/* 
+ * compute the parser table, with keys {X, y} where X nonterminal and y terminal, and values {A, b} where A -> b is a grammar rule 
+ * PRE: compute_first_table and compute_follow_table are executed 
+ * 
+ */
+
 void LLParser::compute_parser_table() {
-    // PRE: compute_first_table and compute_follow_table are called
-    // TODO
+
+    // for each parsing rule A -> a where a is a string of symbols, possibly terminals and nonterminals 
+    // rule 1: for each terminal b in FIRST(a) we put the rule A -> a in position {A,b}
+    // rule 2: if a can derive epsilon then for each t in FOLLOW(A) we put A -> a in position {A,t}
+
+    for (const auto& [non_terminal, expansions] : grammar) {
+        for (const auto& expansion : expansions) {
+            
+            bool can_derive_epsilon = true;
+
+            for (const SymbolType derived_symbol : expansion) {
+
+                // apply rule 1 
+                if (is_terminal(derived_symbol)) {
+                    insert_into_parser_table(parser_table, non_terminal, derived_symbol, {non_terminal, expansion});
+                    can_derive_epsilon = false;
+                    break;
+                }
+                
+                for (const SymbolType first_symbol_of_derived : first_table[derived_symbol]) {
+                    insert_into_parser_table(parser_table, non_terminal, first_symbol_of_derived, {non_terminal, expansion});
+                }
+
+                if (!epsilon_reachable.contains(derived_symbol)) {
+                    can_derive_epsilon = false;
+                    break;
+                }
+            }
+
+            // apply rule 2
+            if (can_derive_epsilon && follow_table.contains(non_terminal)) {
+                for (const SymbolType follow_st : follow_table[non_terminal]) {
+                    insert_into_parser_table(parser_table, non_terminal, follow_st, {non_terminal, expansion});
+                }
+            }
+        }
+    }
 }
 

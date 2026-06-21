@@ -22,13 +22,13 @@ public:
     std::unique_ptr<ParserNode> get_result();
 
 private: 
-    void compute_tables(const Grammar& grammar);
+    void compute_tables();
 
     void separate_symbols();
 
-    void compute_epsilon_reachable(const Grammar& grammar);
-    void compute_first_table(const Grammar& grammar);
-    void compute_follow_table(const Grammar& grammar);
+    void compute_epsilon_reachable();
+    void compute_first_table();
+    void compute_follow_table();
 
     void compute_parser_table();
 
