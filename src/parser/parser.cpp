@@ -1,7 +1,8 @@
 /* 
  * honk!
- * references: https://www.geeksforgeeks.org/compiler-design/construction-of-ll1-parsing-table/ 
- * 
+ * references:
+ * https://www.geeksforgeeks.org/compiler-design/construction-of-ll1-parsing-table/ 
+ * https://en.wikipedia.org/wiki/LL_parser#Constructing_an_LL(1)_parsing_table
  */
 
 #include <iostream>
@@ -16,7 +17,10 @@ namespace {
         return true;
     }
 
-    void insert_into_parser_table(ParserTable& parser_table, SymbolType non_terminal, SymbolType terminal, const std::pair<SymbolType, Expansion>& grammar_rule) {
+    void insert_into_parser_table(ParserTable& parser_table, 
+                                  SymbolType non_terminal, 
+                                  SymbolType terminal, 
+                                  const std::pair<SymbolType, Expansion>& grammar_rule) {
         if (parser_table.contains({non_terminal, terminal})) {
             std::cerr << "Parser table already contains entry at: {" << non_terminal << ", " << terminal << "}" << std::endl;
             throw std::runtime_error("Parser error");
@@ -71,7 +75,7 @@ void LLParser::compute_epsilon_reachable() {
         for (const auto& [non_terminal, expansions] : grammar) {
             for (const auto& expansion : expansions) {
                 // if the expansion contains only the epsilon character then it means the non-terminal directly 
-                if (expansion.size() == 1 && expansion[0] == SymbolType::EPSILON) epsilon_reachable.insert(non_terminal);
+                if (expansion.size() == 1 && expansion[0] == SymbolType::_EPSILON) epsilon_reachable.insert(non_terminal);
 
                 // if expansion contains only non-terminals that can derive epsilon, then also add the non-terminal in 
                 if (unordered_set_contains_all(prev_epsilon_reachable, expansion)) epsilon_reachable.insert(non_terminal); 
@@ -112,8 +116,8 @@ void LLParser::compute_first_table() {
             const auto& cur_expansions = grammar.at(non_terminal);
             auto& cur_first_table_entry = first_table.at(non_terminal);
             for (const auto& expansion : cur_expansions) {
-                if (expansion[0] == EPSILON) cur_first_table_entry.insert(EPSILON);
-                if (epsilon_reachable.contains(non_terminal)) cur_first_table_entry.insert(EPSILON);
+                if (expansion[0] == _EPSILON) cur_first_table_entry.insert(_EPSILON);
+                if (epsilon_reachable.contains(non_terminal)) cur_first_table_entry.insert(_EPSILON);
                 for (SymbolType child_symbol : expansion) {
                     if (terminals.contains(child_symbol)) {
                         cur_first_table_entry.insert(child_symbol);
@@ -149,7 +153,7 @@ void LLParser::compute_follow_table() {
     }
 
     // rule 1
-    follow_table[START_SYMBOL] = {END_SYMBOL};
+    follow_table[START_SYMBOL] = {_END_SYMBOL};
     
     SymbolMappingTable prev_follow_table;
     do {
@@ -176,7 +180,7 @@ void LLParser::compute_follow_table() {
 
                         // adding everything from FIRST(follow_st) to FOLLOW(cur_st), since everything between cur_st and follow_st can be derived to epsilon
                         for (const auto first_st : first_table[follow_st]) {
-                            if (first_st == EPSILON) continue;
+                            if (first_st == _EPSILON) continue;
                             follow_table[cur_st].insert(first_st);
                         }
 

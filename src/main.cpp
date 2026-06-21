@@ -2,8 +2,9 @@
 #include <fstream>
 #include <string>
 
-#include <dfa.h>
-#include <state_list.h>
+#include <lexer/dfa.h>
+#include <parser/parser.h>
+#include <parser/grammar.h>
 
 int main(int argc, char* argv[]) {
     // usage: goose basic.goose
@@ -16,6 +17,8 @@ int main(int argc, char* argv[]) {
         std::cerr << "Invalid file name provided" << std::endl;
         return 1;
     }
+
+    // stage 1: lexer
     DFA dfa;
     try {
         dfa.parse(file_name);
@@ -25,6 +28,9 @@ int main(int argc, char* argv[]) {
         return 2;
     }
     Tokens tokens = dfa.get_result();
+    
+    // stage 2: parser 
+    LLParser parser {goose_grammar};
     
     return 0;
 }

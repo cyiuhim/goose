@@ -7,7 +7,7 @@ CPPFILES=$(wildcard *.cpp)
 OBJECTS=${CPPFILES:.cpp=.o}
 DEPENDS=${CPPFILES:.cpp=.d}
 
-SUBDIRS = lexer
+SUBDIRS = lexer parser
 SUBOBJS = $(addsuffix .o, $(SUBDIRS))
 
 .PHONY: all clean ${SUBDIRS}

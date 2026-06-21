@@ -7,23 +7,23 @@
 
 typedef std::unordered_map<SymbolType, std::vector<Expansion>> Grammar;
 
-Grammar goose_grammar = {
+inline Grammar goose_grammar = {
     {START_SYMBOL, {
         {FUNC_DFNS}
     }},
     {FUNC_DFNS, {
         {FUNC_DFN, FUNC_DFNS}, 
-        {EPSILON}
+        {_EPSILON}
     }},
     {FUNC_DFN, {
-        {START, FUNC_AT, IDENTIFIER, FUNC_AT, STATEMENTS, END, FUNC_AT, IDENTIFIER, FUNC_AT}
+        {_START, _FUNC_AT, _IDENTIFIER, _FUNC_AT, STATEMENTS, _END, _FUNC_AT, _IDENTIFIER, _FUNC_AT}
     }},
     {STATEMENTS, {
         {STATEMENT, STATEMENTS}, 
-        {EPSILON}
+        {_EPSILON}
     }},
     {STATEMENT, {
-        {RAW_STATEMENT, PERIOD}
+        {RAW_STATEMENT, _PERIOD}
     }},
     {RAW_STATEMENT, {
         {DECLARE_STATEMENT},
@@ -31,13 +31,13 @@ Grammar goose_grammar = {
         {FUNC_CALL_STATEMENT}
     }},
     {DECLARE_STATEMENT, {
-        {FLAP, IDENTIFIER, ASSIGN, EXPR}
+        {_FLAP, _IDENTIFIER, _ASSIGN, EXPR}
     }},
     {ASSIGN_STATEMENT, {
-        {IDENTIFIER, ASSIGN, EXPR}
+        {_IDENTIFIER, _ASSIGN, EXPR}
     }}, 
     {FUNC_CALL_STATEMENT, {
-        {IDENTIFIER, PARAM_OPEN_PAREN, PARAMS, PARAM_CLOSE_PAREN}
+        {_IDENTIFIER, _PARAM_OPEN_PAREN, PARAMS, _PARAM_CLOSE_PAREN}
     }},
     {EXPR, {
         {TERM}
@@ -46,15 +46,15 @@ Grammar goose_grammar = {
         {FACTOR}
     }},
     {FACTOR, {
-        {NUMBER}
+        {_NUMBER}
     }},
     {PARAMS, {
-        {PARAM, COMMA, PARAMS}, 
-        {EPSILON}
+        {PARAM, _COMMA, PARAMS}, 
+        {_EPSILON}
     }},
     {PARAM, {
-        {STRING_LITERAL},
-        {NUMBER}
+        {_STRING_LITERAL},
+        {_NUMBER}
     }}
 };
 

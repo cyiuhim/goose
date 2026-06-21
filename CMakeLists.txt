@@ -22,6 +22,17 @@ target_include_directories(goose_lexer
         ${CMAKE_CURRENT_SOURCE_DIR}/include/lexer
 )
 
+add_library(goose_parser
+    src/parser/parser.cpp
+)
+
+target_include_directories(goose_parser
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/lexer
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/parser
+)
+
 add_executable(goose
     src/main.cpp
 )
@@ -29,12 +40,14 @@ add_executable(goose
 target_link_libraries(goose
     PRIVATE
         goose_lexer
+        goose_parser
 )
 
 target_include_directories(goose
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/include/lexer
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/parser
 )
 
 install(TARGETS goose RUNTIME DESTINATION bin)

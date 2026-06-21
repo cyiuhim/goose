@@ -23,22 +23,22 @@ enum SymbolType {
     // end of non-terminals 
     END_NON_TERMINALS,
 
-    EPSILON,
-    IDENTIFIER,
-    NUMBER,
-    ASSIGN,
-    PERIOD,
-    PARAM_OPEN_PAREN,
-    PARAM_CLOSE_PAREN,
-    FUNC_AT,
-    STRING_LITERAL,
-    COMMA,
-    FLAP,
-    START,
-    END,
+    _EPSILON,
+    _IDENTIFIER,
+    _NUMBER,
+    _ASSIGN,
+    _PERIOD,
+    _PARAM_OPEN_PAREN,
+    _PARAM_CLOSE_PAREN,
+    _FUNC_AT,
+    _STRING_LITERAL,
+    _COMMA,
+    _FLAP,
+    _START,
+    _END,
     
     // special $ character
-    END_SYMBOL,
+    _END_SYMBOL,
 
     // end of symbol type 
     END_ENUM

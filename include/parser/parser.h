@@ -7,11 +7,11 @@
 
 #include <lexer/dfa.h>
 
-#include <unordered_map>
+#include <map>
 #include <unordered_set>
 
-typedef std::unordered_map<SymbolType, std::unordered_set<SymbolType>> SymbolMappingTable;
-typedef std::unordered_map<std::pair<SymbolType, SymbolType>, std::pair<SymbolType, Expansion>> ParserTable;
+typedef std::map<SymbolType, std::unordered_set<SymbolType>> SymbolMappingTable;
+typedef std::map<std::pair<SymbolType, SymbolType>, std::pair<SymbolType, Expansion>> ParserTable;
 
 class LLParser {
 public: 
