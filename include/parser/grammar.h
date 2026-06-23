@@ -27,6 +27,9 @@ inline Grammar goose_grammar = {
     }},
     {RAW_STATEMENT, {
         {DECLARE_STATEMENT},
+        {_IDENTIFIER, ID_START_STATEMENT},
+    }},
+    {ID_START_STATEMENT, {
         {ASSIGN_STATEMENT},
         {FUNC_CALL_STATEMENT}
     }},
@@ -34,10 +37,10 @@ inline Grammar goose_grammar = {
         {_FLAP, _IDENTIFIER, _ASSIGN, EXPR}
     }},
     {ASSIGN_STATEMENT, {
-        {_IDENTIFIER, _ASSIGN, EXPR}
+        {_ASSIGN, EXPR}
     }}, 
     {FUNC_CALL_STATEMENT, {
-        {_IDENTIFIER, _PARAM_OPEN_PAREN, PARAMS, _PARAM_CLOSE_PAREN}
+        {_PARAM_OPEN_PAREN, PARAMS, _PARAM_CLOSE_PAREN}
     }},
     {EXPR, {
         {TERM}

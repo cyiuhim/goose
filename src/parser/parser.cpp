@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <format>
 #include <parser/parser.h>
 
 namespace {
@@ -56,6 +57,7 @@ void LLParser::compute_tables() {
     compute_epsilon_reachable();
     compute_first_table();
     compute_follow_table();
+    validate_grammar();
     compute_parser_table();
 }
 
@@ -201,6 +203,58 @@ void LLParser::compute_follow_table() {
             }
         }
     } while (prev_follow_table != follow_table);
+}
+
+/* 
+ * validate whether the grammar is LL(1) compatible 
+ * PRE: compute_first_table and compute_follow_table are executed 
+ */
+
+void LLParser::validate_grammar() {
+
+    // get the predict sets for each production rule 
+    // PREDICT(A -> a) would be FIRST(a) if a cannot derive epsilon, else FIRST(a) - {epsilon} U FOLLOW(A) if a can derive epsilon 
+    // the grammar is LL1 comptaible if and only if for all nonterminals A, no two production rules of A would have overlapping PREDICT sets 
+
+    for (const auto& [non_terminal, expansions] : grammar) {
+        if (expansions.size() < 2) continue;
+        std::vector<std::unordered_set<SymbolType>> predict_sets;
+        for (const auto& expansion : expansions) {
+            std::unordered_set<SymbolType> cur_predict_set;
+            bool can_derive_epsilon = true;
+            for (const SymbolType derived_st : expansion) {
+                if (is_terminal(derived_st)) {
+                    cur_predict_set.insert(derived_st);
+                    can_derive_epsilon = false;
+                    break;
+                }
+                for (const SymbolType first_of_derived : first_table[derived_st]) {
+                    if (first_of_derived != _EPSILON) cur_predict_set.insert(first_of_derived);
+                }
+                if (!epsilon_reachable.contains(derived_st)) {
+                    can_derive_epsilon = false;
+                    break;
+                }
+            }
+            if (can_derive_epsilon) {
+                for (const SymbolType follow_st : follow_table[non_terminal]) {
+                    cur_predict_set.insert(follow_st);
+                }
+            }
+            predict_sets.push_back(std::move(cur_predict_set));
+        }
+        for (int i = 0; i < predict_sets.size(); i++) {
+            for (int j = i + 1; j < predict_sets.size(); j++) {
+                const auto& predict_set_1 = predict_sets[i];
+                const auto& predict_set_2 = predict_sets[j];
+                for (const auto predict_st : predict_set_1) {
+                    if (predict_set_2.contains(predict_st)) {
+                        throw std::runtime_error(std::format("Error in validating grammar, non-terminal involved: {}, with rules {} and {}", static_cast<int> (non_terminal), i, j));
+                    }
+                }
+            }
+        }
+    }
 }
 
 /* 

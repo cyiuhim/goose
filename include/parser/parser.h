@@ -30,6 +30,8 @@ private:
     void compute_first_table();
     void compute_follow_table();
 
+    void validate_grammar();
+
     void compute_parser_table();
 
     // member variables 
