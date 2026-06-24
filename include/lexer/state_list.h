@@ -4,8 +4,10 @@
 #include <cctype>
 #include <string>
 
+#include <symbol.h>
+
 #include "state.h"
-#include "token.h"
+
 
 inline State empty_state;
 inline State langle_state;
@@ -98,10 +100,10 @@ void populate_state_list();
 
 inline std::string goose_alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_#<>.,@= \n\t\r'\"";
 
-inline std::vector<std::pair<State*, TokenType>> goose_accepting_state_map = {
+inline std::vector<std::pair<State*, Terminal>> goose_accepting_state_map = {
     {&comment_state, COMMENT},
-    {&langle2_state, PARAM_OPEN_PARAN},
-    {&rangle2_state, PARAM_CLOSE_PARAN},
+    {&langle2_state, PARAM_OPEN_PAREN},
+    {&rangle2_state, PARAM_CLOSE_PAREN},
     {&equal_state, ASSIGN},
     {&space_state, SPACES},
     {&identifier_state, IDENTIFIER},
@@ -112,7 +114,7 @@ inline std::vector<std::pair<State*, TokenType>> goose_accepting_state_map = {
     {&comma_state, COMMA}
 };
 
-inline std::vector<std::pair<std::string, TokenType>> goose_keywords = {
+inline std::vector<std::pair<std::string, Terminal>> goose_keywords = {
     {"flap", FLAP},
     {"start", START},
     {"end", END}

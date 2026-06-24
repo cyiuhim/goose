@@ -2,7 +2,7 @@
 #define __PARSER_NODE_H__
 
 #include <memory>
-#include "symbol.h"
+#include <symbol.h>
 
 struct ParserNode {
     SymbolType symbol_type;

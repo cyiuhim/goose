@@ -19,19 +19,23 @@ namespace {
     }
 
     void insert_into_parser_table(ParserTable& parser_table, 
-                                  SymbolType non_terminal, 
-                                  SymbolType terminal, 
-                                  const std::pair<SymbolType, Expansion>& grammar_rule) {
+                                  NonTerminal non_terminal, 
+                                  Terminal terminal, 
+                                  const std::pair<NonTerminal, Expansion>& grammar_rule) {
         if (parser_table.contains({non_terminal, terminal})) {
             std::cerr << "Parser table already contains entry at: {" << non_terminal << ", " << terminal << "}" << std::endl;
             throw std::runtime_error("Parser error");
         }
         parser_table[{non_terminal, terminal}] = grammar_rule;
     }
+
+    bool symbol_equals_terminal(SymbolType st, Terminal terminal) {
+        return std::holds_alternative<Terminal> (st) && std::get<Terminal> (st) == terminal;
+    }
 }
 
 LLParser::LLParser(const Grammar& grammar) : grammar{grammar} {
-    separate_symbols();
+    populate_symbols();
     compute_tables();
 }
 
@@ -43,17 +47,13 @@ std::unique_ptr<ParserNode> LLParser::get_result() {
     return std::move(tree);
 }
 
-void LLParser::separate_symbols() {
-    for (int i = 0; i < SymbolType::END_ENUM; i++) {
-        SymbolType cur_symbol = static_cast<SymbolType> (i);
-        if (!is_valid_symbol(cur_symbol)) continue;
-        if (is_terminal(cur_symbol)) terminals.insert(cur_symbol);
-        else non_terminals.insert(cur_symbol);
-    }
+void LLParser::populate_symbols() {
+    for (int i = 0; i < END_NON_TERMINALS; i++) non_terminals.push_back(static_cast<NonTerminal> (i));
+    for (int i = 0; i < END_TERMINALS; i++) terminals.push_back(static_cast<Terminal> (i));
 }
 
 void LLParser::compute_tables() {
-    // PRE: separate_symbols are called 
+    // PRE: populate_symbols are called 
     compute_epsilon_reachable();
     compute_first_table();
     compute_follow_table();
@@ -63,7 +63,7 @@ void LLParser::compute_tables() {
 
 /* 
  * compute all the non-terminals that can derive epsilon 
- * PRE: separate_symbols is called 
+ * PRE: populate_symbols is called 
  */
 void LLParser::compute_epsilon_reachable() {
     
@@ -77,7 +77,7 @@ void LLParser::compute_epsilon_reachable() {
         for (const auto& [non_terminal, expansions] : grammar) {
             for (const auto& expansion : expansions) {
                 // if the expansion contains only the epsilon character then it means the non-terminal directly 
-                if (expansion.size() == 1 && expansion[0] == SymbolType::_EPSILON) epsilon_reachable.insert(non_terminal);
+                if (expansion.size() == 1 && symbol_equals_terminal(expansion[0], EPSILON)) epsilon_reachable.insert(non_terminal);
 
                 // if expansion contains only non-terminals that can derive epsilon, then also add the non-terminal in 
                 if (unordered_set_contains_all(prev_epsilon_reachable, expansion)) epsilon_reachable.insert(non_terminal); 
@@ -118,14 +118,14 @@ void LLParser::compute_first_table() {
             const auto& cur_expansions = grammar.at(non_terminal);
             auto& cur_first_table_entry = first_table.at(non_terminal);
             for (const auto& expansion : cur_expansions) {
-                if (expansion[0] == _EPSILON) cur_first_table_entry.insert(_EPSILON);
-                if (epsilon_reachable.contains(non_terminal)) cur_first_table_entry.insert(_EPSILON);
+                if (symbol_equals_terminal(expansion[0], EPSILON)) cur_first_table_entry.insert(EPSILON);
+                if (epsilon_reachable.contains(non_terminal)) cur_first_table_entry.insert(EPSILON);
                 for (SymbolType child_symbol : expansion) {
-                    if (terminals.contains(child_symbol)) {
-                        cur_first_table_entry.insert(child_symbol);
+                    if (std::holds_alternative<Terminal> (child_symbol)) {
+                        cur_first_table_entry.insert(std::get<Terminal> (child_symbol));
                         break;
                     }
-                    for (SymbolType child_derived_symbol : prev_first_table.at(child_symbol)) {
+                    for (Terminal child_derived_symbol : prev_first_table.at(std::get<NonTerminal> (child_symbol))) {
                         cur_first_table_entry.insert(child_derived_symbol);
                     }
                     if (!epsilon_reachable.contains(child_symbol)) break; 
@@ -155,7 +155,7 @@ void LLParser::compute_follow_table() {
     }
 
     // rule 1
-    follow_table[START_SYMBOL] = {_END_SYMBOL};
+    follow_table[START_SYMBOL] = {END_SYMBOL};
     
     SymbolMappingTable prev_follow_table;
     do {
@@ -166,7 +166,9 @@ void LLParser::compute_follow_table() {
                     const SymbolType cur_st = expansion[cur_idx];
 
                     // we only consider the case where cur_st is a nonterminal 
-                    if (is_terminal(cur_st)) continue;
+                    if (!std::holds_alternative<NonTerminal> (cur_st)) continue;
+
+                    const NonTerminal cur_nt = std::get<NonTerminal> (cur_st);
 
                     // checking if rule 3 can be applied while going through the symbols after cur_st
                     bool can_follow_empty = true;
@@ -174,16 +176,16 @@ void LLParser::compute_follow_table() {
                         const SymbolType follow_st = expansion[follow_idx];
 
                         // rule 2
-                        if (is_terminal(follow_st)) {
-                            follow_table[cur_st].insert(follow_st);
+                        if (std::holds_alternative<Terminal>(follow_st)) {
+                            follow_table[cur_nt].insert(std::get<Terminal> (follow_st));
                             can_follow_empty = false;
                             break;
                         }
 
                         // adding everything from FIRST(follow_st) to FOLLOW(cur_st), since everything between cur_st and follow_st can be derived to epsilon
-                        for (const auto first_st : first_table[follow_st]) {
-                            if (first_st == _EPSILON) continue;
-                            follow_table[cur_st].insert(first_st);
+                        for (const auto first_st : first_table[std::get<NonTerminal> (follow_st)]) {
+                            if (symbol_equals_terminal(first_st, EPSILON)) continue;
+                            follow_table[cur_nt].insert(first_st);
                         }
 
                         // if the follow_st cannot reach epsilon then we don't have to care what comes after 
@@ -196,7 +198,7 @@ void LLParser::compute_follow_table() {
                     if (can_follow_empty) {
                         // that means non_terminal -> (something) cur_st (list of nonterminals that can all reach epsilon)
                         for (const auto follow_st : prev_follow_table[non_terminal]) {
-                            follow_table[cur_st].insert(follow_st);
+                            follow_table[cur_nt].insert(follow_st);
                         }
                     }
                 }
@@ -218,18 +220,18 @@ void LLParser::validate_grammar() {
 
     for (const auto& [non_terminal, expansions] : grammar) {
         if (expansions.size() < 2) continue;
-        std::vector<std::unordered_set<SymbolType>> predict_sets;
+        std::vector<std::unordered_set<Terminal>> predict_sets;
         for (const auto& expansion : expansions) {
-            std::unordered_set<SymbolType> cur_predict_set;
+            std::unordered_set<Terminal> cur_predict_set;
             bool can_derive_epsilon = true;
             for (const SymbolType derived_st : expansion) {
-                if (is_terminal(derived_st)) {
-                    cur_predict_set.insert(derived_st);
+                if (std::holds_alternative<Terminal> (derived_st)) {
+                    cur_predict_set.insert(std::get<Terminal> (derived_st));
                     can_derive_epsilon = false;
                     break;
                 }
-                for (const SymbolType first_of_derived : first_table[derived_st]) {
-                    if (first_of_derived != _EPSILON) cur_predict_set.insert(first_of_derived);
+                for (const Terminal first_of_derived : first_table[std::get<NonTerminal> (derived_st)]) {
+                    if (first_of_derived != EPSILON) cur_predict_set.insert(first_of_derived);
                 }
                 if (!epsilon_reachable.contains(derived_st)) {
                     can_derive_epsilon = false;
@@ -237,7 +239,7 @@ void LLParser::validate_grammar() {
                 }
             }
             if (can_derive_epsilon) {
-                for (const SymbolType follow_st : follow_table[non_terminal]) {
+                for (const Terminal follow_st : follow_table[non_terminal]) {
                     cur_predict_set.insert(follow_st);
                 }
             }
@@ -277,13 +279,13 @@ void LLParser::compute_parser_table() {
             for (const SymbolType derived_symbol : expansion) {
 
                 // apply rule 1 
-                if (is_terminal(derived_symbol)) {
-                    insert_into_parser_table(parser_table, non_terminal, derived_symbol, {non_terminal, expansion});
+                if (std::holds_alternative<Terminal> (derived_symbol)) {
+                    insert_into_parser_table(parser_table, non_terminal, std::get<Terminal> (derived_symbol), {non_terminal, expansion});
                     can_derive_epsilon = false;
                     break;
                 }
                 
-                for (const SymbolType first_symbol_of_derived : first_table[derived_symbol]) {
+                for (const Terminal first_symbol_of_derived : first_table[std::get<NonTerminal> (derived_symbol)]) {
                     insert_into_parser_table(parser_table, non_terminal, first_symbol_of_derived, {non_terminal, expansion});
                 }
 
@@ -295,7 +297,7 @@ void LLParser::compute_parser_table() {
 
             // apply rule 2
             if (can_derive_epsilon && follow_table.contains(non_terminal)) {
-                for (const SymbolType follow_st : follow_table[non_terminal]) {
+                for (const Terminal follow_st : follow_table[non_terminal]) {
                     insert_into_parser_table(parser_table, non_terminal, follow_st, {non_terminal, expansion});
                 }
             }

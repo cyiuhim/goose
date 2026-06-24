@@ -60,7 +60,7 @@ void DFA::parse(std::string file_name) {
         if (!backtrack.last_state) {
             throw std::runtime_error(std::format("error parsing at line {} char {} with current token {}", text[idx].line_no, text[idx].char_no, cur_token));
         }
-        TokenType token_type = accepting_states.at(backtrack.last_state);
+        Terminal token_type = accepting_states.at(backtrack.last_state);
         tokens.emplace_back(token_type, cur_token.substr(0, backtrack.last_idx - start_idx));
         idx = backtrack.last_idx;
     }
@@ -71,26 +71,26 @@ void DFA::parse(std::string file_name) {
 
 void DFA::process_identifiers() {
     for (auto& token : tokens) {
-        if (token.first == IDENTIFIER) {
-            auto new_token_type = keyword_dict.check_word(token.second);
+        if (token.token_type == IDENTIFIER) {
+            auto new_token_type = keyword_dict.check_word(token.lexeme);
             if (new_token_type.has_value()) {
-                token.first = *new_token_type;
+                token.token_type = *new_token_type;
             }
         }
     }
 }
 
 void DFA::remove_spaces_and_comments() {
-    std::vector<std::pair<TokenType, std::string>> new_tokens;
+    Tokens new_tokens;
     for (const auto& token : tokens) {
-        if (token.first == SPACES) continue;
-        if (token.first == COMMENT) continue;
+        if (token.token_type == SPACES) continue;
+        if (token.token_type == COMMENT) continue;
         new_tokens.push_back(token);
     }
     tokens = std::move(new_tokens);
 }
 
-std::vector<std::pair<TokenType, std::string>> DFA::get_result() {
+Tokens DFA::get_result() {
     return tokens;
 }
 
@@ -108,13 +108,13 @@ void DFA::add_state(State* state) {
     states.insert(state);
 }
 
-void DFA::add_accepting_states(std::vector<std::pair<State*, TokenType>> state_map) {
+void DFA::add_accepting_states(std::vector<std::pair<State*, Terminal>> state_map) {
     for (auto& [state, token] : state_map) {
         accepting_states[state] = token;
     }
 }
 
-void DFA::add_keywords(std::vector<std::pair<std::string, TokenType>> keywords) {
+void DFA::add_keywords(std::vector<std::pair<std::string, Terminal>> keywords) {
     for (const auto& keyword_pair : keywords) {
         keyword_dict.add_word(keyword_pair.first, keyword_pair.second);
     }

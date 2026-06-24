@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <filesystem>
+#include <symbol.h>
 #include <lexer/dfa.h>
-#include <lexer/token.h>
 #include <lexer/state.h>
 
 namespace fs = std::filesystem;
@@ -27,7 +27,7 @@ TEST_F(DFATest, ParseSimpleIdentifier) {
     
     // Should have: SOF, FLAP, IDENTIFIER, ASSIGN, NUMBER, PERIOD, EOF
     EXPECT_GT(tokens.size(), 0);
-    EXPECT_EQ(tokens[0].first, SOF);
+    EXPECT_EQ(tokens[0].token_type, SOF);
 }
 
 // Test keyword recognition (FLAP)
@@ -40,7 +40,7 @@ TEST_F(DFATest, RecognizeFlapKeyword) {
     // After processing, "flap" should be recognized as FLAP keyword
     bool found_flap = false;
     for (const auto& token : tokens) {
-        if (token.first == FLAP && token.second == "flap") {
+        if (token.token_type == FLAP && token.lexeme == "flap") {
             found_flap = true;
             break;
         }
@@ -57,7 +57,7 @@ TEST_F(DFATest, RecognizeStartKeyword) {
     
     bool found_start = false;
     for (const auto& token : tokens) {
-        if (token.first == START && token.second == "start") {
+        if (token.token_type == START && token.lexeme == "start") {
             found_start = true;
             break;
         }
@@ -74,7 +74,7 @@ TEST_F(DFATest, RecognizeEndKeyword) {
     
     bool found_end = false;
     for (const auto& token : tokens) {
-        if (token.first == END && token.second == "end") {
+        if (token.token_type == END && token.lexeme == "end") {
             found_end = true;
             break;
         }
@@ -92,7 +92,7 @@ TEST_F(DFATest, RecognizeNumbers) {
     // Count number tokens
     int number_count = 0;
     for (const auto& token : tokens) {
-        if (token.first == NUMBER) {
+        if (token.token_type == NUMBER) {
             number_count++;
         }
     }
@@ -108,7 +108,7 @@ TEST_F(DFATest, RecognizeAssignmentOperator) {
     
     bool found_assign = false;
     for (const auto& token : tokens) {
-        if (token.first == ASSIGN) {
+        if (token.token_type == ASSIGN) {
             found_assign = true;
             break;
         }
@@ -125,7 +125,7 @@ TEST_F(DFATest, RecognizePeriod) {
     
     bool found_period = false;
     for (const auto& token : tokens) {
-        if (token.first == PERIOD) {
+        if (token.token_type == PERIOD) {
             found_period = true;
             break;
         }
@@ -143,7 +143,7 @@ TEST_F(DFATest, RecognizeFunctionDecorator) {
     // Should contain FUNC_AT tokens
     int func_at_count = 0;
     for (const auto& token : tokens) {
-        if (token.first == FUNC_AT) {
+        if (token.token_type == FUNC_AT) {
             func_at_count++;
         }
     }
@@ -159,7 +159,7 @@ TEST_F(DFATest, RecognizeParameterBrackets) {
     
     bool found_open = false;
     for (const auto& token : tokens) {
-        if (token.first == PARAM_OPEN_PARAN) {
+        if (token.token_type == PARAM_OPEN_PAREN) {
             found_open = true;
             break;
         }
@@ -176,7 +176,7 @@ TEST_F(DFATest, RecognizeComma) {
     
     int comma_count = 0;
     for (const auto& token : tokens) {
-        if (token.first == COMMA) {
+        if (token.token_type == COMMA) {
             comma_count++;
         }
     }
@@ -192,7 +192,7 @@ TEST_F(DFATest, RecognizeQuotedString) {
     
     bool found_quote = false;
     for (const auto& token : tokens) {
-        if (token.first == STRING_LITERAL) {
+        if (token.token_type == STRING_LITERAL) {
             found_quote = true;
             break;
         }
@@ -209,7 +209,7 @@ TEST_F(DFATest, RemoveComments) {
     
     // Comments should be removed, so no COMMENT tokens after removal
     for (const auto& token : tokens) {
-        EXPECT_NE(token.first, COMMENT);
+        EXPECT_NE(token.token_type, COMMENT);
     }
 }
 
@@ -225,9 +225,9 @@ TEST_F(DFATest, ParseComplexProgram) {
     
     bool has_start = false, has_flap = false, has_honk = false, has_end = false;
     for (const auto& token : tokens) {
-        if (token.first == START) has_start = true;
-        if (token.first == FLAP) has_flap = true;
-        if (token.first == END) has_end = true;
+        if (token.token_type == START) has_start = true;
+        if (token.token_type == FLAP) has_flap = true;
+        if (token.token_type == END) has_end = true;
     }
     
     EXPECT_TRUE(has_start);
@@ -250,7 +250,7 @@ TEST_F(DFATest, ParseMultipleIdentifiers) {
     // Count identifier tokens
     int identifier_count = 0;
     for (const auto& token : tokens) {
-        if (token.first == IDENTIFIER) {
+        if (token.token_type == IDENTIFIER) {
             identifier_count++;
         }
     }
@@ -281,7 +281,7 @@ TEST_F(DFATest, WhitespaceTokens) {
     // Verify we have identifiers
     int identifier_count = 0;
     for (const auto& token : tokens) {
-        if (token.first == IDENTIFIER) {
+        if (token.token_type == IDENTIFIER) {
             identifier_count++;
         }
     }
@@ -297,8 +297,8 @@ TEST_F(DFATest, ConsecutiveOperators) {
     
     bool has_open = false, has_close = false;
     for (const auto& token : tokens) {
-        if (token.first == PARAM_OPEN_PARAN) has_open = true;
-        if (token.first == PARAM_CLOSE_PARAN) has_close = true;
+        if (token.token_type == PARAM_OPEN_PAREN) has_open = true;
+        if (token.token_type == PARAM_CLOSE_PAREN) has_close = true;
     }
     
     EXPECT_TRUE(has_open);

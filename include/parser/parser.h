@@ -1,17 +1,22 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
-#include "symbol.h"
+#include <symbol.h>
 #include "parser_node.h"
 #include "grammar.h"
-
-#include <lexer/dfa.h>
 
 #include <map>
 #include <unordered_set>
 
-typedef std::map<SymbolType, std::unordered_set<SymbolType>> SymbolMappingTable;
-typedef std::map<std::pair<SymbolType, SymbolType>, std::pair<SymbolType, Expansion>> ParserTable;
+typedef std::map<NonTerminal, std::unordered_set<Terminal>> SymbolMappingTable;
+typedef std::map<std::pair<NonTerminal, Terminal>, std::pair<NonTerminal, Expansion>> ParserTable;
+
+struct TransformedToken {
+    SymbolType symbol;
+    std::string lexeme;
+};
+
+typedef std::vector<TransformedToken> ParserInput;
 
 class LLParser {
 public: 
@@ -24,7 +29,7 @@ public:
 private: 
     void compute_tables();
 
-    void separate_symbols();
+    void populate_symbols();
 
     void compute_epsilon_reachable();
     void compute_first_table();
@@ -36,10 +41,9 @@ private:
 
     // member variables 
     const Grammar& grammar;
-
    
-    std::unordered_set<SymbolType> non_terminals;
-    std::unordered_set<SymbolType> terminals;
+    std::vector<NonTerminal> non_terminals;
+    std::vector<Terminal> terminals;
 
      /* all the non-terminals that can derive epsilon */
     std::unordered_set<SymbolType> epsilon_reachable;

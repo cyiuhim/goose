@@ -5,7 +5,7 @@
 #include <optional>
 #include <string>
 
-#include "token.h"
+#include <symbol.h>
 
 // only supports tries with only lowercase characters 
 class TrieNode {
@@ -14,12 +14,12 @@ public:
     TrieNode();
     // destructor 
     ~TrieNode();
-    void add_word(std::string word, TokenType token);
-    std::optional<TokenType> check_word(std::string word);
+    void add_word(std::string word, Terminal token);
+    std::optional<Terminal> check_word(std::string word);
 
 private:
     std::vector<TrieNode*> children;
-    std::optional<TokenType> end_token; // end token if there is something here
+    std::optional<Terminal> end_token; // end token if there is something here
 
 };
 

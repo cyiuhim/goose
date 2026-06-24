@@ -1,11 +1,11 @@
 #ifndef __GRAMMAR_H__
 #define __GRAMMAR_H__
 
-#include "symbol.h"
+#include <symbol.h>
 
 #include <unordered_map>
 
-typedef std::unordered_map<SymbolType, std::vector<Expansion>> Grammar;
+typedef std::unordered_map<NonTerminal, std::vector<Expansion>> Grammar;
 
 inline Grammar goose_grammar = {
     {START_SYMBOL, {
@@ -13,34 +13,34 @@ inline Grammar goose_grammar = {
     }},
     {FUNC_DFNS, {
         {FUNC_DFN, FUNC_DFNS}, 
-        {_EPSILON}
+        {EPSILON}
     }},
     {FUNC_DFN, {
-        {_START, _FUNC_AT, _IDENTIFIER, _FUNC_AT, STATEMENTS, _END, _FUNC_AT, _IDENTIFIER, _FUNC_AT}
+        {START, FUNC_AT, IDENTIFIER, FUNC_AT, STATEMENTS, END, FUNC_AT, IDENTIFIER, FUNC_AT}
     }},
     {STATEMENTS, {
         {STATEMENT, STATEMENTS}, 
-        {_EPSILON}
+        {EPSILON}
     }},
     {STATEMENT, {
-        {RAW_STATEMENT, _PERIOD}
+        {RAW_STATEMENT, PERIOD}
     }},
     {RAW_STATEMENT, {
         {DECLARE_STATEMENT},
-        {_IDENTIFIER, ID_START_STATEMENT},
+        {IDENTIFIER, ID_START_STATEMENT},
     }},
     {ID_START_STATEMENT, {
         {ASSIGN_STATEMENT},
         {FUNC_CALL_STATEMENT}
     }},
     {DECLARE_STATEMENT, {
-        {_FLAP, _IDENTIFIER, _ASSIGN, EXPR}
+        {FLAP, IDENTIFIER, ASSIGN, EXPR}
     }},
     {ASSIGN_STATEMENT, {
-        {_ASSIGN, EXPR}
+        {ASSIGN, EXPR}
     }}, 
     {FUNC_CALL_STATEMENT, {
-        {_PARAM_OPEN_PAREN, PARAMS, _PARAM_CLOSE_PAREN}
+        {PARAM_OPEN_PAREN, PARAMS, PARAM_CLOSE_PAREN}
     }},
     {EXPR, {
         {TERM}
@@ -49,15 +49,15 @@ inline Grammar goose_grammar = {
         {FACTOR}
     }},
     {FACTOR, {
-        {_NUMBER}
+        {NUMBER}
     }},
     {PARAMS, {
-        {PARAM, _COMMA, PARAMS}, 
-        {_EPSILON}
+        {PARAM, COMMA, PARAMS}, 
+        {EPSILON}
     }},
     {PARAM, {
-        {_STRING_LITERAL},
-        {_NUMBER}
+        {STRING_LITERAL},
+        {NUMBER}
     }}
 };
 
