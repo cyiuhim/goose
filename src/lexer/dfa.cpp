@@ -36,7 +36,6 @@ void DFA::parse(std::string file_name) {
         line_cnt++;
     }
     tokens.clear();
-    tokens.emplace_back(SOF, "");
     size_t idx = 0;
 
     while (idx < text.size()) {
@@ -64,7 +63,6 @@ void DFA::parse(std::string file_name) {
         tokens.emplace_back(token_type, cur_token.substr(0, backtrack.last_idx - start_idx));
         idx = backtrack.last_idx;
     }
-    tokens.emplace_back(_EOF, "");
     process_identifiers();
     remove_spaces_and_comments();
 }

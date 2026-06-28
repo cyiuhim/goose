@@ -27,7 +27,6 @@ TEST_F(DFATest, ParseSimpleIdentifier) {
     
     // Should have: SOF, FLAP, IDENTIFIER, ASSIGN, NUMBER, PERIOD, EOF
     EXPECT_GT(tokens.size(), 0);
-    EXPECT_EQ(tokens[0].token_type, SOF);
 }
 
 // Test keyword recognition (FLAP)

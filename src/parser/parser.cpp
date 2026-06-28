@@ -7,7 +7,11 @@
 
 #include <iostream>
 #include <format>
+#include <stack>
+#include <ranges>
+
 #include <parser/parser.h>
+#include <helper.h>
 
 namespace {
     template<typename T> 
@@ -37,10 +41,6 @@ namespace {
 LLParser::LLParser(const Grammar& grammar) : grammar{grammar} {
     populate_symbols();
     compute_tables();
-}
-
-void LLParser::parse(const Tokens& tokens) {
-    // TODO 
 }
 
 std::unique_ptr<ParserNode> LLParser::get_result() {
@@ -305,3 +305,75 @@ void LLParser::compute_parser_table() {
     }
 }
 
+/*
+ * takes the output from the lexer in the form of tokens, and construct the parse tree
+ * PRE: compute_parser_table is executed (which it is, by the constructor of LLParser)
+ */
+
+void LLParser::parse(const Tokens& tokens) {
+    
+    // keep track of two stacks, the node stack and the symbol stack
+    // node stack is used for keeping track of which node to expand on 
+    // symbol stack is used for keeping track of which symbols should be consumed / derived next, depending on whether it's terminal or nonterminal
+
+    std::stack<ParserNode*> node_stack;
+    std::stack<SymbolType> symbol_stack;
+
+    // start with root on the node stack 
+    // start with {START_SYMBOL, $} on the symbol_stack
+
+    tree.reset(new ParserNode {START_SYMBOL});
+    node_stack.push(tree.get());
+    symbol_stack.push(END_SYMBOL);
+    symbol_stack.push(START_SYMBOL);
+
+    int token_idx = 0;
+
+    // go through the stream of tokens 
+    // if seeing the current token is the same as whatever is on the top of the symbol_stack, then pop it
+    // otherwise, find out entry in the parser table on position {nonterminal on top of symbol stack, current token}
+    // find the expansion, pop the symbol stack and node stack and create same number of children as symbols in expansion
+    // push children nodes onto the node stack, the symbols onto the symbol stack, BOTH IN REVERSE ORDER (basically the first token of the expansion should be on top)
+    // continue until going through the whole stream of tokens
+    // or throw an error if seeing missing entry in parser table or exhausted stream of tokens / symbol stack before the other one
+
+    while (token_idx < tokens.size()) {
+        auto cur_token = tokens[token_idx];
+        SymbolType top_symbol = symbol_stack.top();
+        ParserNode *parent_node = node_stack.top();
+        symbol_stack.pop();
+        node_stack.pop();
+        if (std::holds_alternative<Terminal> (top_symbol)) {
+            Terminal top_terminal = std::get<Terminal> (top_symbol);
+            if (top_terminal != cur_token.token_type) {
+                throw std::runtime_error(std::format("Expected symbol {}, instead got {}", to_string(top_terminal), to_string(cur_token.token_type)));
+            }
+            parent_node->lexeme = cur_token.lexeme;
+            token_idx++;
+        }
+        else {
+            NonTerminal top_non_terminal = std::get<NonTerminal> (top_symbol);
+            if (!parser_table.contains({top_non_terminal, cur_token.token_type})) {
+                // find the possible terminals that can go with it 
+                std::vector<std::string> expected_terminals;
+                for (const Terminal terminal : terminals) {
+                    if (parser_table.contains({top_non_terminal, terminal})) {
+                        expected_terminals.push_back(to_string(terminal));
+                    }
+                }
+                throw std::runtime_error(std::format("Unexpected symbol: {}, expected: {}", to_string(cur_token.token_type), join(expected_terminals)));
+            }
+            const auto& [_, expansion] = parser_table.at({top_non_terminal, cur_token.token_type});
+            for (const SymbolType expansion_symbol : expansion | std::views::reverse) {
+                // put it onto the symbol stack 
+                symbol_stack.push(expansion_symbol);
+                // create node and push it onto the node stack 
+                auto new_node = std::make_unique<ParserNode> (expansion_symbol);
+                node_stack.push(new_node.get());
+                parent_node->children.push_back(std::move(new_node));
+            }
+            
+            std::ranges::reverse(parent_node->children);
+        }
+    }
+}

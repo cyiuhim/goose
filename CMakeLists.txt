@@ -23,6 +23,7 @@ target_include_directories(goose_lexer
 )
 
 add_library(goose_parser
+    src/helper.cpp
     src/parser/parser.cpp
 )
 

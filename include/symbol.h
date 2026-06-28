@@ -27,8 +27,6 @@ enum NonTerminal {
 };
 
 enum Terminal {
-    SOF, // start of file
-    _EOF, // end of file
     IDENTIFIER, // any identifier
     NUMBER, // number
     ASSIGN, // =
@@ -52,6 +50,51 @@ enum Terminal {
 
     END_TERMINALS
 };
+
+static std::vector<std::string> non_terminal_strings = {
+    "START_SYMBOL",
+    "FUNC_DFNS",
+    "FUNC_DFN",
+    "STATEMENTS",
+    "STATEMENT",
+    "RAW_STATEMENT",
+    "DECLARE_STATEMENT",
+    "ID_START_STATEMENT",
+    "ASSIGN_STATEMENT",
+    "FUNC_CALL_STATEMENT",
+    "EXPR",
+    "TERM",
+    "FACTOR",
+    "PARAMS",
+    "PARAM",
+};
+
+static std::vector<std::string> terminal_strings = {
+    "identifier",
+    "number",
+    "=",
+    ".",
+    "<<",
+    ">>",
+    "@",
+    "//",
+    " ",
+    "string literal",
+    ",",
+    "flap",
+    "start",
+    "end",
+    "epsilon",
+    "end of file"
+};
+
+inline std::string to_string(Terminal terminal) {
+    return terminal_strings.at(static_cast<int> (terminal));
+}
+
+inline std::string to_string(NonTerminal non_terminal) {
+    return non_terminal_strings.at(static_cast<int> (non_terminal));
+}
 
 typedef std::variant<NonTerminal, Terminal> SymbolType;
 typedef std::vector<SymbolType> Expansion;

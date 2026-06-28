@@ -11,13 +11,6 @@
 typedef std::map<NonTerminal, std::unordered_set<Terminal>> SymbolMappingTable;
 typedef std::map<std::pair<NonTerminal, Terminal>, std::pair<NonTerminal, Expansion>> ParserTable;
 
-struct TransformedToken {
-    SymbolType symbol;
-    std::string lexeme;
-};
-
-typedef std::vector<TransformedToken> ParserInput;
-
 class LLParser {
 public: 
     LLParser(const Grammar& grammar);
