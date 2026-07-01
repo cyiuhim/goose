@@ -5,8 +5,8 @@
 #include <fstream>
 
 struct CharInfo {
-    int line_no;
-    int char_no;
+    unsigned int line_no;
+    unsigned int char_no;
     char c;
 };
 
@@ -25,9 +25,9 @@ void DFA::parse(std::string file_name) {
     }
     std::vector<CharInfo> text;
     std::string line;
-    int line_cnt = 1;
+    unsigned int line_cnt = 1;
     while (std::getline(in, line)) {
-        int char_no = 1;
+        unsigned int char_no = 1;
         for (char c : line) {
             text.push_back({line_cnt, char_no, c});
             char_no++;
@@ -41,6 +41,8 @@ void DFA::parse(std::string file_name) {
     while (idx < text.size()) {
         State* cur_state = start_state;
         const size_t start_idx = idx;
+        unsigned int start_line_no = text[idx].line_no;
+        unsigned int start_char_no = text[idx].char_no;
         BacktrackInfo backtrack = {"", (size_t) (-1), nullptr};
         std::string cur_token;
         while (idx < text.size()) {
@@ -60,7 +62,7 @@ void DFA::parse(std::string file_name) {
             throw std::runtime_error(std::format("error parsing at line {} char {} with current token {}", text[idx].line_no, text[idx].char_no, cur_token));
         }
         Terminal token_type = accepting_states.at(backtrack.last_state);
-        tokens.emplace_back(token_type, cur_token.substr(0, backtrack.last_idx - start_idx));
+        tokens.emplace_back(token_type, cur_token.substr(0, backtrack.last_idx - start_idx), start_line_no, start_char_no);
         idx = backtrack.last_idx;
     }
     process_identifiers();

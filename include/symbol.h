@@ -102,6 +102,8 @@ typedef std::vector<SymbolType> Expansion;
 struct LexerToken {
     Terminal token_type;
     std::string lexeme;
+    unsigned int line_no;
+    unsigned int char_no;
 };
 
 typedef std::vector<LexerToken> Tokens;

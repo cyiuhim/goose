@@ -352,9 +352,11 @@ void LLParser::parse(const Tokens& tokens) {
                 continue;
             }
             if (top_terminal != cur_token.token_type) {
-                throw std::runtime_error(std::format("Expected symbol {}, instead got {}", to_string(top_terminal), to_string(cur_token.token_type)));
+                throw std::runtime_error(std::format("Unexpected symbol: {} at line {} char {}, possible: {}", to_string(cur_token.token_type), cur_token.line_no, cur_token.char_no, to_string(top_terminal)));
             }
             parent_node->lexeme = cur_token.lexeme;
+            parent_node->line_no = cur_token.line_no;
+            parent_node->char_no = cur_token.char_no;
             token_idx++;
         }
         else {
@@ -367,7 +369,7 @@ void LLParser::parse(const Tokens& tokens) {
                         expected_terminals.push_back(to_string(terminal));
                     }
                 }
-                throw std::runtime_error(std::format("Unexpected symbol: {}, expected: {}", to_string(cur_token.token_type), join(expected_terminals)));
+                throw std::runtime_error(std::format("Unexpected symbol: {} at line {} char {}, possible: {}", to_string(cur_token.token_type), cur_token.line_no, cur_token.char_no, join(expected_terminals)));
             }
             const auto& [_, expansion] = parser_table.at({top_non_terminal, cur_token.token_type});
             for (const SymbolType expansion_symbol : expansion | std::views::reverse) {
