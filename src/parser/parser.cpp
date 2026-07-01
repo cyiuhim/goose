@@ -280,8 +280,11 @@ void LLParser::compute_parser_table() {
 
                 // apply rule 1 
                 if (std::holds_alternative<Terminal> (derived_symbol)) {
-                    insert_into_parser_table(parser_table, non_terminal, std::get<Terminal> (derived_symbol), {non_terminal, expansion});
-                    can_derive_epsilon = false;
+                    Terminal derived_terminal = std::get<Terminal> (derived_symbol);
+                    insert_into_parser_table(parser_table, non_terminal, derived_terminal, {non_terminal, expansion});
+                    if (derived_terminal != EPSILON) {
+                        can_derive_epsilon = false;
+                    }
                     break;
                 }
                 
@@ -345,6 +348,9 @@ void LLParser::parse(const Tokens& tokens) {
         node_stack.pop();
         if (std::holds_alternative<Terminal> (top_symbol)) {
             Terminal top_terminal = std::get<Terminal> (top_symbol);
+            if (top_terminal == EPSILON) {
+                continue;
+            }
             if (top_terminal != cur_token.token_type) {
                 throw std::runtime_error(std::format("Expected symbol {}, instead got {}", to_string(top_terminal), to_string(cur_token.token_type)));
             }
@@ -376,4 +382,19 @@ void LLParser::parse(const Tokens& tokens) {
             std::ranges::reverse(parent_node->children);
         }
     }
+
+    while (true) {
+        SymbolType top_symbol = symbol_stack.top();
+        if (std::holds_alternative<NonTerminal> (top_symbol) && epsilon_reachable.contains(std::get<NonTerminal> (top_symbol))) {
+            symbol_stack.pop();
+            node_stack.pop();
+        }
+        else break;
+    }
+
+    // validation: the symbol stack should only have the end symbol, and the node stack should be empty
+    if (symbol_stack.size() > 1) {
+        throw std::runtime_error(std::format("Error: finished parsing but symbols remaining"));
+    }
+
 }

@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.20)
 
 project(goose LANGUAGES CXX)
 
+# Default to a Debug build (adds -g) when the caller doesn't specify a build
+# type, so debuggers get file/line info out of the box.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

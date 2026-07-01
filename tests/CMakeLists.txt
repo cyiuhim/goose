@@ -29,3 +29,22 @@ target_include_directories(lexer_test
 )
 
 add_test(NAME lexer_test COMMAND lexer_test)
+
+add_executable(parser_test
+    parser_test.cpp
+)
+
+target_link_libraries(parser_test
+    PRIVATE
+        goose_parser
+        GTest::gtest_main
+)
+
+target_include_directories(parser_test
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../include
+        ${CMAKE_CURRENT_SOURCE_DIR}/../include/lexer
+        ${CMAKE_CURRENT_SOURCE_DIR}/../include/parser
+)
+
+add_test(NAME parser_test COMMAND parser_test)

@@ -26,7 +26,8 @@ LEXER_SOURCES = $(LEXER_DIR)/dfa.cpp \
 LEXER_OBJECTS = $(LEXER_SOURCES:.cpp=.o)
 
 # Test file
-TEST_SOURCES = $(TEST_DIR)/lexer_test.cpp
+TEST_SOURCES = $(TEST_DIR)/lexer_test.cpp \
+			   $(TEST_DIR)/parser_test.cpp
 TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
 
 # Output

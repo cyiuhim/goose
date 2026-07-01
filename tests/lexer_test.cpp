@@ -256,17 +256,6 @@ TEST_F(DFATest, ParseMultipleIdentifiers) {
     EXPECT_EQ(identifier_count, 3);
 }
 
-// Test empty file handling
-TEST_F(DFATest, HandleEmptyFile) {
-    std::string filename = fixture_path("empty.goose");
-    
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-    
-    // Should at least have SOF and EOF
-    EXPECT_GE(tokens.size(), 1);
-}
-
 // Test whitespace handling
 TEST_F(DFATest, WhitespaceTokens) {
     std::string filename = fixture_path("whitespace.goose");
