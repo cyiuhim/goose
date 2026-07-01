@@ -5,7 +5,8 @@
 #include <vector>
 #include <string>
 
-enum NonTerminal {
+enum NonTerminal
+{
     START_SYMBOL,
     FUNC_DFNS,
     FUNC_DFN,
@@ -22,29 +23,30 @@ enum NonTerminal {
     PARAMS,
     PARAM,
 
-    // end of non-terminals 
+    // end of non-terminals
     END_NON_TERMINALS
 };
 
-enum Terminal {
-    IDENTIFIER, // any identifier
-    NUMBER, // number
-    ASSIGN, // =
-    PERIOD, // end of statement
-    PARAM_OPEN_PAREN, // <<
+enum Terminal
+{
+    IDENTIFIER,        // any identifier
+    NUMBER,            // number
+    ASSIGN,            // =
+    PERIOD,            // end of statement
+    PARAM_OPEN_PAREN,  // <<
     PARAM_CLOSE_PAREN, // >>
-    FUNC_AT, // function at symbol, @
-    COMMENT, // comment
-    SPACES, // one or more spaces
-    STRING_LITERAL, // wrapped inside a pair of double quotes
-    COMMA, // ,
+    FUNC_AT,           // function at symbol, @
+    COMMENT,           // comment
+    SPACES,            // one or more spaces
+    STRING_LITERAL,    // wrapped inside a pair of double quotes
+    COMMA,             // ,
 
     // keywords
-    FLAP, // flap (let)
+    FLAP,  // flap (let)
     START, // start
-    END, // end
+    END,   // end
 
-    // special symbols 
+    // special symbols
     EPSILON,
     END_SYMBOL, // $
 
@@ -85,21 +87,23 @@ static std::vector<std::string> terminal_strings = {
     "start",
     "end",
     "epsilon",
-    "end of file"
-};
+    "end of file"};
 
-inline std::string to_string(Terminal terminal) {
-    return terminal_strings.at(static_cast<int> (terminal));
+inline std::string to_string(Terminal terminal)
+{
+    return terminal_strings.at(static_cast<int>(terminal));
 }
 
-inline std::string to_string(NonTerminal non_terminal) {
-    return non_terminal_strings.at(static_cast<int> (non_terminal));
+inline std::string to_string(NonTerminal non_terminal)
+{
+    return non_terminal_strings.at(static_cast<int>(non_terminal));
 }
 
 typedef std::variant<NonTerminal, Terminal> SymbolType;
 typedef std::vector<SymbolType> Expansion;
 
-struct LexerToken {
+struct LexerToken
+{
     Terminal token_type;
     std::string lexeme;
     unsigned int line_no;
@@ -108,4 +112,4 @@ struct LexerToken {
 
 typedef std::vector<LexerToken> Tokens;
 
-#endif 
+#endif

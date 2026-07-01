@@ -4,8 +4,9 @@
 #include <memory>
 #include <symbol.h>
 
-struct ParserNode {
-    ParserNode(SymbolType st) : symbol_type {st}, line_no{0}, char_no{0} {}
+struct ParserNode
+{
+    ParserNode(SymbolType st) : symbol_type{st}, line_no{0}, char_no{0} {}
     SymbolType symbol_type;
     std::optional<std::string> lexeme;
     std::vector<std::unique_ptr<ParserNode>> children;
@@ -13,4 +14,4 @@ struct ParserNode {
     unsigned int char_no;
 };
 
-#endif 
+#endif

@@ -11,15 +11,16 @@
 typedef std::map<NonTerminal, std::unordered_set<Terminal>> SymbolMappingTable;
 typedef std::map<std::pair<NonTerminal, Terminal>, std::pair<NonTerminal, Expansion>> ParserTable;
 
-class LLParser {
-public: 
-    LLParser(const Grammar& grammar);
+class LLParser
+{
+public:
+    LLParser(const Grammar &grammar);
 
-    void parse(const Tokens& tokens);
+    void parse(const Tokens &tokens);
 
     std::unique_ptr<ParserNode> get_result();
 
-private: 
+private:
     void compute_tables();
 
     void populate_symbols();
@@ -32,13 +33,13 @@ private:
 
     void compute_parser_table();
 
-    // member variables 
-    const Grammar& grammar;
-   
+    // member variables
+    const Grammar &grammar;
+
     std::vector<NonTerminal> non_terminals;
     std::vector<Terminal> terminals;
 
-     /* all the non-terminals that can derive epsilon */
+    /* all the non-terminals that can derive epsilon */
     std::unordered_set<SymbolType> epsilon_reachable;
 
     SymbolMappingTable first_table;
@@ -49,4 +50,4 @@ private:
     std::unique_ptr<ParserNode> tree;
 };
 
-#endif 
+#endif

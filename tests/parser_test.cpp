@@ -17,86 +17,92 @@
 // include END_SYMBOL — appending it makes the parser try to match the
 // sentinel and dereference an empty node stack (segfault).
 
-namespace {
+namespace
+{
 
-// A tiny, epsilon-free grammar for deterministic positive parsing tests:
-//
-//   START_SYMBOL -> FLAP IDENTIFIER ASSIGN NUMBER
-//
-Grammar simple_grammar() {
-    return {
-        {START_SYMBOL, {
-            {FLAP, IDENTIFIER, ASSIGN, NUMBER}
-        }}
-    };
-}
-
-// A grammar with a genuine LL(1) choice (distinct FIRST terminals):
-//
-//   START_SYMBOL -> FLAP IDENTIFIER
-//                 | START IDENTIFIER
-//
-Grammar choice_grammar() {
-    return {
-        {START_SYMBOL, {
-            {FLAP, IDENTIFIER},
-            {START, IDENTIFIER},
-        }}
-    };
-}
-
-// A grammar with a nested non-terminal, producing a multi-level tree:
-//
-//   START_SYMBOL -> EXPR NUMBER
-//   EXPR         -> FLAP IDENTIFIER
-//
-Grammar nested_grammar() {
-    return {
-        {START_SYMBOL, {
-            {EXPR, NUMBER}
-        }},
-        {EXPR, {
-            {FLAP, IDENTIFIER}
-        }},
-    };
-}
-
-Terminal terminal_of(const ParserNode& node) {
-    return std::get<Terminal>(node.symbol_type);
-}
-
-NonTerminal non_terminal_of(const ParserNode& node) {
-    return std::get<NonTerminal>(node.symbol_type);
-}
-
-// Serialize a parse tree to a compact S-expression so an entire tree can be
-// asserted with a single string comparison. Terminals render as
-// `name:lexeme` (or just `name` when no lexeme was matched, e.g. epsilon);
-// non-terminals render as `(NAME child child ...)`.
-std::string to_sexpr(const ParserNode* n) {
-    if (std::holds_alternative<Terminal>(n->symbol_type)) {
-        std::string s = to_string(std::get<Terminal>(n->symbol_type));
-        if (n->lexeme) s += ":" + *n->lexeme;
-        return s;
+    // A tiny, epsilon-free grammar for deterministic positive parsing tests:
+    //
+    //   START_SYMBOL -> FLAP IDENTIFIER ASSIGN NUMBER
+    //
+    Grammar simple_grammar()
+    {
+        return {
+            {START_SYMBOL, {{FLAP, IDENTIFIER, ASSIGN, NUMBER}}}};
     }
-    std::string s = "(" + to_string(std::get<NonTerminal>(n->symbol_type));
-    for (const auto& c : n->children) s += " " + to_sexpr(c.get());
-    return s + ")";
-}
 
-// Returns true if any non-terminal node in the tree has zero children. Every
-// non-terminal must expand to at least one symbol (epsilon productions carry
-// an explicit EPSILON leaf), so a childless non-terminal indicates a
-// malformed tree.
-bool has_childless_nonterminal(const ParserNode* n) {
-    if (std::holds_alternative<NonTerminal>(n->symbol_type) && n->children.empty()) {
-        return true;
+    // A grammar with a genuine LL(1) choice (distinct FIRST terminals):
+    //
+    //   START_SYMBOL -> FLAP IDENTIFIER
+    //                 | START IDENTIFIER
+    //
+    Grammar choice_grammar()
+    {
+        return {
+            {START_SYMBOL, {
+                               {FLAP, IDENTIFIER},
+                               {START, IDENTIFIER},
+                           }}};
     }
-    for (const auto& c : n->children) {
-        if (has_childless_nonterminal(c.get())) return true;
+
+    // A grammar with a nested non-terminal, producing a multi-level tree:
+    //
+    //   START_SYMBOL -> EXPR NUMBER
+    //   EXPR         -> FLAP IDENTIFIER
+    //
+    Grammar nested_grammar()
+    {
+        return {
+            {START_SYMBOL, {{EXPR, NUMBER}}},
+            {EXPR, {{FLAP, IDENTIFIER}}},
+        };
     }
-    return false;
-}
+
+    Terminal terminal_of(const ParserNode &node)
+    {
+        return std::get<Terminal>(node.symbol_type);
+    }
+
+    NonTerminal non_terminal_of(const ParserNode &node)
+    {
+        return std::get<NonTerminal>(node.symbol_type);
+    }
+
+    // Serialize a parse tree to a compact S-expression so an entire tree can be
+    // asserted with a single string comparison. Terminals render as
+    // `name:lexeme` (or just `name` when no lexeme was matched, e.g. epsilon);
+    // non-terminals render as `(NAME child child ...)`.
+    std::string to_sexpr(const ParserNode *n)
+    {
+        if (std::holds_alternative<Terminal>(n->symbol_type))
+        {
+            std::string s = to_string(std::get<Terminal>(n->symbol_type));
+            if (n->lexeme)
+                s += ":" + *n->lexeme;
+            return s;
+        }
+        std::string s = "(" + to_string(std::get<NonTerminal>(n->symbol_type));
+        for (const auto &c : n->children)
+            s += " " + to_sexpr(c.get());
+        return s + ")";
+    }
+
+    // Returns true if any non-terminal node in the tree has zero children. Every
+    // non-terminal must expand to at least one symbol (epsilon productions carry
+    // an explicit EPSILON leaf), so a childless non-terminal indicates a
+    // malformed tree.
+    bool has_childless_nonterminal(const ParserNode *n)
+    {
+        if (std::holds_alternative<NonTerminal>(n->symbol_type) && n->children.empty())
+        {
+            return true;
+        }
+        for (const auto &c : n->children)
+        {
+            if (has_childless_nonterminal(c.get()))
+                return true;
+        }
+        return false;
+    }
 
 } // namespace
 
@@ -104,17 +110,18 @@ bool has_childless_nonterminal(const ParserNode* n) {
 // Construction / grammar validation
 // ---------------------------------------------------------------------------
 
-TEST(ParserConstruction, GooseGrammarIsLL1) {
+TEST(ParserConstruction, GooseGrammarIsLL1)
+{
     EXPECT_NO_THROW({ LLParser parser{goose_grammar}; });
 }
 
-TEST(ParserConstruction, AmbiguousGrammarThrows) {
+TEST(ParserConstruction, AmbiguousGrammarThrows)
+{
     Grammar ambiguous = {
         {START_SYMBOL, {
-            {FLAP, IDENTIFIER},
-            {FLAP, NUMBER},   // overlapping FIRST terminal (FLAP)
-        }}
-    };
+                           {FLAP, IDENTIFIER},
+                           {FLAP, NUMBER}, // overlapping FIRST terminal (FLAP)
+                       }}};
     EXPECT_THROW({ LLParser parser{ambiguous}; }, std::runtime_error);
 }
 
@@ -122,7 +129,8 @@ TEST(ParserConstruction, AmbiguousGrammarThrows) {
 // Parsing: happy path
 // ---------------------------------------------------------------------------
 
-TEST(ParserParse, ValidStreamProducesExpectedTree) {
+TEST(ParserParse, ValidStreamProducesExpectedTree)
+{
     Grammar g = simple_grammar();
     LLParser parser{g};
 
@@ -159,7 +167,8 @@ TEST(ParserParse, ValidStreamProducesExpectedTree) {
 }
 
 // The parser table must pick the correct production based on the lookahead.
-TEST(ParserParse, SelectsProductionByLookahead) {
+TEST(ParserParse, SelectsProductionByLookahead)
+{
     Grammar g = choice_grammar();
     LLParser parser{g};
 
@@ -180,7 +189,8 @@ TEST(ParserParse, SelectsProductionByLookahead) {
 }
 
 // A nested non-terminal should yield a nested subtree.
-TEST(ParserParse, NestedNonTerminalProducesSubtree) {
+TEST(ParserParse, NestedNonTerminalProducesSubtree)
+{
     Grammar g = nested_grammar();
     LLParser parser{g};
 
@@ -198,7 +208,7 @@ TEST(ParserParse, NestedNonTerminalProducesSubtree) {
     EXPECT_EQ(non_terminal_of(*tree), START_SYMBOL);
     ASSERT_EQ(tree->children.size(), 2u);
 
-    const ParserNode& expr = *tree->children[0];
+    const ParserNode &expr = *tree->children[0];
     ASSERT_TRUE(std::holds_alternative<NonTerminal>(expr.symbol_type));
     EXPECT_EQ(non_terminal_of(expr), EXPR);
 
@@ -214,7 +224,8 @@ TEST(ParserParse, NestedNonTerminalProducesSubtree) {
 }
 
 // get_result() transfers ownership; a second call yields nullptr.
-TEST(ParserParse, GetResultMovesTree) {
+TEST(ParserParse, GetResultMovesTree)
+{
     Grammar g = simple_grammar();
     LLParser parser{g};
 
@@ -237,34 +248,43 @@ TEST(ParserParse, GetResultMovesTree) {
 // ---------------------------------------------------------------------------
 
 // A terminal on the stack that does not match the current token throws.
-TEST(ParserParse, TerminalMismatchThrows) {
+TEST(ParserParse, TerminalMismatchThrows)
+{
     Grammar g = simple_grammar();
     LLParser parser{g};
 
     Tokens tokens = {
         {FLAP, "flap"},
-        {NUMBER, "42"},   // grammar expects IDENTIFIER here
+        {NUMBER, "42"}, // grammar expects IDENTIFIER here
     };
     EXPECT_THROW(parser.parse(tokens), std::runtime_error);
 }
 
 // A leading token with no entry in the parser table throws.
-TEST(ParserParse, UnexpectedLeadingSymbolThrows) {
+TEST(ParserParse, UnexpectedLeadingSymbolThrows)
+{
     Grammar g = simple_grammar();
     LLParser parser{g};
 
     Tokens tokens = {
-        {NUMBER, "42"},   // START_SYMBOL can only begin with FLAP
+        {NUMBER, "42"}, // START_SYMBOL can only begin with FLAP
     };
     EXPECT_THROW(parser.parse(tokens), std::runtime_error);
 }
 
-TEST(ParserParse, GooseEmptyFunctionParses) {
+TEST(ParserParse, GooseEmptyFunctionParses)
+{
     LLParser parser{goose_grammar};
 
     Tokens tokens = {
-        {START, "start"}, {FUNC_AT, "@"}, {IDENTIFIER, "foo"}, {FUNC_AT, "@"},
-        {END, "end"},     {FUNC_AT, "@"}, {IDENTIFIER, "foo"}, {FUNC_AT, "@"},
+        {START, "start"},
+        {FUNC_AT, "@"},
+        {IDENTIFIER, "foo"},
+        {FUNC_AT, "@"},
+        {END, "end"},
+        {FUNC_AT, "@"},
+        {IDENTIFIER, "foo"},
+        {FUNC_AT, "@"},
     };
     ASSERT_NO_THROW(parser.parse(tokens));
 
@@ -279,13 +299,24 @@ TEST(ParserParse, GooseEmptyFunctionParses) {
 // Function with a declaration statement exercises STATEMENTS -> STATEMENT
 // STATEMENTS followed by a STATEMENTS -> epsilon tail:
 //   start @ foo @ flap x = 5 . end @ foo @
-TEST(ParserParse, GooseFunctionWithDeclarationParses) {
+TEST(ParserParse, GooseFunctionWithDeclarationParses)
+{
     LLParser parser{goose_grammar};
 
     Tokens tokens = {
-        {START, "start"}, {FUNC_AT, "@"}, {IDENTIFIER, "foo"}, {FUNC_AT, "@"},
-        {FLAP, "flap"}, {IDENTIFIER, "x"}, {ASSIGN, "="}, {NUMBER, "5"}, {PERIOD, "."},
-        {END, "end"}, {FUNC_AT, "@"}, {IDENTIFIER, "foo"}, {FUNC_AT, "@"},
+        {START, "start"},
+        {FUNC_AT, "@"},
+        {IDENTIFIER, "foo"},
+        {FUNC_AT, "@"},
+        {FLAP, "flap"},
+        {IDENTIFIER, "x"},
+        {ASSIGN, "="},
+        {NUMBER, "5"},
+        {PERIOD, "."},
+        {END, "end"},
+        {FUNC_AT, "@"},
+        {IDENTIFIER, "foo"},
+        {FUNC_AT, "@"},
     };
     ASSERT_NO_THROW(parser.parse(tokens));
 
@@ -296,14 +327,27 @@ TEST(ParserParse, GooseFunctionWithDeclarationParses) {
 
 // Two functions back-to-back exercise FUNC_DFNS recursion plus the epsilon
 // tail at the end of the program.
-TEST(ParserParse, GooseTwoFunctionsParse) {
+TEST(ParserParse, GooseTwoFunctionsParse)
+{
     LLParser parser{goose_grammar};
 
     Tokens tokens = {
-        {START, "start"}, {FUNC_AT, "@"}, {IDENTIFIER, "a"}, {FUNC_AT, "@"},
-        {END, "end"},     {FUNC_AT, "@"}, {IDENTIFIER, "a"}, {FUNC_AT, "@"},
-        {START, "start"}, {FUNC_AT, "@"}, {IDENTIFIER, "b"}, {FUNC_AT, "@"},
-        {END, "end"},     {FUNC_AT, "@"}, {IDENTIFIER, "b"}, {FUNC_AT, "@"},
+        {START, "start"},
+        {FUNC_AT, "@"},
+        {IDENTIFIER, "a"},
+        {FUNC_AT, "@"},
+        {END, "end"},
+        {FUNC_AT, "@"},
+        {IDENTIFIER, "a"},
+        {FUNC_AT, "@"},
+        {START, "start"},
+        {FUNC_AT, "@"},
+        {IDENTIFIER, "b"},
+        {FUNC_AT, "@"},
+        {END, "end"},
+        {FUNC_AT, "@"},
+        {IDENTIFIER, "b"},
+        {FUNC_AT, "@"},
     };
     EXPECT_NO_THROW(parser.parse(tokens));
 }

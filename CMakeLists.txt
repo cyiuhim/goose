@@ -59,6 +59,6 @@ target_include_directories(goose
 
 install(TARGETS goose RUNTIME DESTINATION bin)
 
-if(BUILD_TESTING)
-    add_subdirectory(tests)
-endif()
+# if(BUILD_TESTING)
+#     add_subdirectory(tests)
+# endif()

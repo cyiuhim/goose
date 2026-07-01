@@ -8,27 +8,28 @@
 
 #include <symbol.h>
 
-class DFA {
-public: 
+class DFA
+{
+public:
     DFA();
-    void parse (std::string file_name);
+    void parse(std::string file_name);
     Tokens get_result();
 
 private:
     void process_identifiers();
     void remove_spaces_and_comments();
     void populate_alphabet(std::string valid_chars);
-    void set_start_state(State* state);
-    void add_state(State* state);
-    void add_accepting_states(std::vector<std::pair<State*, Terminal>>);
+    void set_start_state(State *state);
+    void add_state(State *state);
+    void add_accepting_states(std::vector<std::pair<State *, Terminal>>);
     void add_keywords(std::vector<std::pair<std::string, Terminal>>);
 
     Tokens tokens;
     std::set<char> alphabet;
-    State* start_state;
-    std::set<State*> states;
-    std::map<State*, Terminal> accepting_states;
+    State *start_state;
+    std::set<State *> states;
+    std::map<State *, Terminal> accepting_states;
     TrieNode keyword_dict;
 };
 
-#endif 
+#endif

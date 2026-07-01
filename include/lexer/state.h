@@ -6,14 +6,15 @@
 #include <utility>
 #include <functional>
 
-class State {
-public: 
-    void add_condition(std::function<bool(char)> condition, State* next_state);
+class State
+{
+public:
+    void add_condition(std::function<bool(char)> condition, State *next_state);
 
-    State* get_next_state(char c);
+    State *get_next_state(char c);
 
 private:
-    std::vector<std::pair<std::function<bool(char)>, State*>> next_states;
+    std::vector<std::pair<std::function<bool(char)>, State *>> next_states;
 };
 
-#endif 
+#endif

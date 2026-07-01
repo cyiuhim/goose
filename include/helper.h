@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-std::string join (const std::vector<std::string>& vec, bool add_quotes = true, std::string delimiter = " ");
+std::string join(const std::vector<std::string> &vec, bool add_quotes = true, std::string delimiter = " ");
 
-
-#endif 
+#endif
