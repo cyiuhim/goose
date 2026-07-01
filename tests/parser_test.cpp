@@ -69,6 +69,35 @@ NonTerminal non_terminal_of(const ParserNode& node) {
     return std::get<NonTerminal>(node.symbol_type);
 }
 
+// Serialize a parse tree to a compact S-expression so an entire tree can be
+// asserted with a single string comparison. Terminals render as
+// `name:lexeme` (or just `name` when no lexeme was matched, e.g. epsilon);
+// non-terminals render as `(NAME child child ...)`.
+std::string to_sexpr(const ParserNode* n) {
+    if (std::holds_alternative<Terminal>(n->symbol_type)) {
+        std::string s = to_string(std::get<Terminal>(n->symbol_type));
+        if (n->lexeme) s += ":" + *n->lexeme;
+        return s;
+    }
+    std::string s = "(" + to_string(std::get<NonTerminal>(n->symbol_type));
+    for (const auto& c : n->children) s += " " + to_sexpr(c.get());
+    return s + ")";
+}
+
+// Returns true if any non-terminal node in the tree has zero children. Every
+// non-terminal must expand to at least one symbol (epsilon productions carry
+// an explicit EPSILON leaf), so a childless non-terminal indicates a
+// malformed tree.
+bool has_childless_nonterminal(const ParserNode* n) {
+    if (std::holds_alternative<NonTerminal>(n->symbol_type) && n->children.empty()) {
+        return true;
+    }
+    for (const auto& c : n->children) {
+        if (has_childless_nonterminal(c.get())) return true;
+    }
+    return false;
+}
+
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -122,6 +151,11 @@ TEST(ParserParse, ValidStreamProducesExpectedTree) {
     EXPECT_EQ(*tree->children[1]->lexeme, "x");
     ASSERT_TRUE(tree->children[3]->lexeme.has_value());
     EXPECT_EQ(*tree->children[3]->lexeme, "42");
+
+    // Whole-tree assertion.
+    EXPECT_EQ(to_sexpr(tree.get()),
+              "(START_SYMBOL flap:flap identifier:x =:= number:42)");
+    EXPECT_FALSE(has_childless_nonterminal(tree.get()));
 }
 
 // The parser table must pick the correct production based on the lookahead.
@@ -231,6 +265,45 @@ TEST(ParserParse, GooseEmptyFunctionParses) {
     Tokens tokens = {
         {START, "start"}, {FUNC_AT, "@"}, {IDENTIFIER, "foo"}, {FUNC_AT, "@"},
         {END, "end"},     {FUNC_AT, "@"}, {IDENTIFIER, "foo"}, {FUNC_AT, "@"},
+    };
+    ASSERT_NO_THROW(parser.parse(tokens));
+
+    auto tree = parser.get_result();
+    ASSERT_NE(tree, nullptr);
+    EXPECT_EQ(to_sexpr(tree.get()),
+              "(START_SYMBOL (FUNC_DFNS (FUNC_DFN start:start @:@ identifier:foo @:@ "
+              "(STATEMENTS epsilon) end:end @:@ identifier:foo @:@) (FUNC_DFNS epsilon)))");
+    EXPECT_FALSE(has_childless_nonterminal(tree.get()));
+}
+
+// Function with a declaration statement exercises STATEMENTS -> STATEMENT
+// STATEMENTS followed by a STATEMENTS -> epsilon tail:
+//   start @ foo @ flap x = 5 . end @ foo @
+TEST(ParserParse, GooseFunctionWithDeclarationParses) {
+    LLParser parser{goose_grammar};
+
+    Tokens tokens = {
+        {START, "start"}, {FUNC_AT, "@"}, {IDENTIFIER, "foo"}, {FUNC_AT, "@"},
+        {FLAP, "flap"}, {IDENTIFIER, "x"}, {ASSIGN, "="}, {NUMBER, "5"}, {PERIOD, "."},
+        {END, "end"}, {FUNC_AT, "@"}, {IDENTIFIER, "foo"}, {FUNC_AT, "@"},
+    };
+    ASSERT_NO_THROW(parser.parse(tokens));
+
+    auto tree = parser.get_result();
+    ASSERT_NE(tree, nullptr);
+    EXPECT_EQ(non_terminal_of(*tree), START_SYMBOL);
+}
+
+// Two functions back-to-back exercise FUNC_DFNS recursion plus the epsilon
+// tail at the end of the program.
+TEST(ParserParse, GooseTwoFunctionsParse) {
+    LLParser parser{goose_grammar};
+
+    Tokens tokens = {
+        {START, "start"}, {FUNC_AT, "@"}, {IDENTIFIER, "a"}, {FUNC_AT, "@"},
+        {END, "end"},     {FUNC_AT, "@"}, {IDENTIFIER, "a"}, {FUNC_AT, "@"},
+        {START, "start"}, {FUNC_AT, "@"}, {IDENTIFIER, "b"}, {FUNC_AT, "@"},
+        {END, "end"},     {FUNC_AT, "@"}, {IDENTIFIER, "b"}, {FUNC_AT, "@"},
     };
     EXPECT_NO_THROW(parser.parse(tokens));
 }

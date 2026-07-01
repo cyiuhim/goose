@@ -31,6 +31,8 @@ int main(int argc, char* argv[]) {
     
     // stage 2: parser 
     LLParser parser {goose_grammar};
+    parser.parse(tokens);
+    std::unique_ptr<ParserNode> parse_tree = parser.get_result();
     
     return 0;
 }

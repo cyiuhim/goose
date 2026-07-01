@@ -387,6 +387,8 @@ void LLParser::parse(const Tokens& tokens) {
         SymbolType top_symbol = symbol_stack.top();
         if (std::holds_alternative<NonTerminal> (top_symbol) && epsilon_reachable.contains(std::get<NonTerminal> (top_symbol))) {
             symbol_stack.pop();
+            ParserNode *top_node = node_stack.top();
+            top_node->children.push_back(std::make_unique<ParserNode> (EPSILON));
             node_stack.pop();
         }
         else break;
