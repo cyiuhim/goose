@@ -17,11 +17,19 @@ enum NonTerminal
     ID_START_STATEMENT,
     ASSIGN_STATEMENT,
     FUNC_CALL_STATEMENT,
+    RETURN_STATEMENT,
     EXPR,
+    EXPR_TAIL,
     TERM,
+    TERM_TAIL,
     FACTOR,
+    FUNC_CALL,
+    ARGS,
+    ARGS_TAIL,
+    ARG,
     PARAMS,
     PARAM,
+    TYPE_NAME,
 
     // end of non-terminals
     END_NON_TERMINALS
@@ -29,22 +37,32 @@ enum NonTerminal
 
 enum Terminal
 {
-    IDENTIFIER,        // any identifier
-    NUMBER,            // number
-    ASSIGN,            // =
-    PERIOD,            // end of statement
-    PARAM_OPEN_PAREN,  // <<
-    PARAM_CLOSE_PAREN, // >>
-    FUNC_AT,           // function at symbol, @
-    COMMENT,           // comment
-    SPACES,            // one or more spaces
-    STRING_LITERAL,    // wrapped inside a pair of double quotes
-    COMMA,             // ,
+    IDENTIFIER,      // any identifier
+    NUMBER_LITERAL,  // number
+    ASSIGN,          // =
+    PERIOD,          // end of statement
+    ARG_OPEN_PAREN,  // <<
+    ARG_CLOSE_PAREN, // >>
+    OPEN_PAREN,      // (
+    CLOSE_PAREN,     // )
+    FUNC_AT,         // function at symbol, @
+    COMMENT,         // comment
+    SPACES,          // one or more spaces
+    STRING_LITERAL,  // wrapped inside a pair of double quotes
+    COMMA,           // ,
+    PLUS,            // +
+    MINUS,           // -
+    TIMES,           // *
+    DIVIDE,          // /
+    MOD,             // %
 
     // keywords
-    FLAP,  // flap (let)
-    START, // start
-    END,   // end
+    FLAP,   // flap (let)
+    START,  // start
+    END,    // end
+    NUMBER, // number
+    WORD,   // word
+    RETURN, // return
 
     // special symbols
     EPSILON,
@@ -53,6 +71,9 @@ enum Terminal
     END_TERMINALS
 };
 
+/*
+ * for purposes of error messages only, so that we're not printing out a number for the enum but rather mapped to the token types
+ */
 static std::vector<std::string> non_terminal_strings = {
     "START_SYMBOL",
     "FUNC_DFNS",
@@ -64,13 +85,23 @@ static std::vector<std::string> non_terminal_strings = {
     "ID_START_STATEMENT",
     "ASSIGN_STATEMENT",
     "FUNC_CALL_STATEMENT",
+    "RETURN_STATEMENT",
     "EXPR",
+    "EXPR_TAIL",
     "TERM",
+    "TERM_TAIL",
     "FACTOR",
+    "FUNC_CALL",
+    "ARGS",
+    "ARGS_TAIL",
+    "ARG",
     "PARAMS",
     "PARAM",
-};
+    "TYPE_NAME"};
 
+/*
+ * for purposes of error messages only, so that we're not printing out a number for the enum but rather mapped to the token types
+ */
 static std::vector<std::string> terminal_strings = {
     "identifier",
     "number",
@@ -83,9 +114,17 @@ static std::vector<std::string> terminal_strings = {
     " ",
     "string literal",
     ",",
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
     "flap",
     "start",
     "end",
+    "number",
+    "word",
+    "return",
     "epsilon",
     "end of file"};
 

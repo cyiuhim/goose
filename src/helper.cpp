@@ -1,4 +1,5 @@
 #include <helper.h>
+#include <ranges>
 
 std::string join(const std::vector<std::string> &vec,
                  bool add_quotes,
@@ -22,4 +23,12 @@ std::string join(const std::vector<std::string> &vec,
     if (add_quotes)
         result += '\"';
     return result;
+}
+
+std::function<bool(char)> build_transition_function(std::string transition_chars)
+{
+    return [transition_chars = std::move(transition_chars)](char c) -> bool
+    {
+        return std::ranges::find(transition_chars, c) != transition_chars.end();
+    };
 }

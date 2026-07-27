@@ -184,7 +184,7 @@ TEST_F(DFATest, RecognizeParameterBrackets)
     bool found_open = false;
     for (const auto &token : tokens)
     {
-        if (token.token_type == PARAM_OPEN_PAREN)
+        if (token.token_type == ARG_OPEN_PAREN)
         {
             found_open = true;
             break;
@@ -334,9 +334,9 @@ TEST_F(DFATest, ConsecutiveOperators)
     bool has_open = false, has_close = false;
     for (const auto &token : tokens)
     {
-        if (token.token_type == PARAM_OPEN_PAREN)
+        if (token.token_type == ARG_OPEN_PAREN)
             has_open = true;
-        if (token.token_type == PARAM_CLOSE_PAREN)
+        if (token.token_type == ARG_CLOSE_PAREN)
             has_close = true;
     }
 

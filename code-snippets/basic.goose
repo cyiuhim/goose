@@ -1,6 +1,5 @@
 ## this is a comment
 
-
 ## to define a function, use start and end keywords, and the function names should be wrapped with '@' in front and end 
 ## identifiers should be alphanumeric, and shouldn't start with a number
 
@@ -11,7 +10,7 @@
 ## end a statement with '.'
 ## the print statement, we should use "honk"
 
-start @fly@
+start @fly@ ()
 flap a = 5. 
 ## equivalent to flap a to 5.
 a = 6.
