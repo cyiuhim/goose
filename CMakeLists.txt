@@ -15,11 +15,25 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(CTest)
 
+add_library(goose_common
+    src/helper.cpp
+)
+
+target_include_directories(goose_common
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 add_library(goose_lexer
     src/lexer/dfa.cpp
     src/lexer/state.cpp
     src/lexer/state_list.cpp
     src/lexer/trie_node.cpp
+)
+
+target_link_libraries(goose_lexer
+    PUBLIC
+        goose_common
 )
 
 target_include_directories(goose_lexer
@@ -29,8 +43,12 @@ target_include_directories(goose_lexer
 )
 
 add_library(goose_parser
-    src/helper.cpp
     src/parser/parser.cpp
+)
+
+target_link_libraries(goose_parser
+    PUBLIC
+        goose_common
 )
 
 target_include_directories(goose_parser
@@ -59,6 +77,6 @@ target_include_directories(goose
 
 install(TARGETS goose RUNTIME DESTINATION bin)
 
-# if(BUILD_TESTING)
-#     add_subdirectory(tests)
-# endif()
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

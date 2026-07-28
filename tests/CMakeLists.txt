@@ -36,6 +36,7 @@ add_executable(parser_test
 
 target_link_libraries(parser_test
     PRIVATE
+        goose_lexer
         goose_parser
         GTest::gtest_main
 )

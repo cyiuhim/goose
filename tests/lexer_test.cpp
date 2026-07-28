@@ -1,351 +1,208 @@
 #include <gtest/gtest.h>
-#include <fstream>
+
+#include <algorithm>
 #include <filesystem>
-#include <symbol.h>
+#include <initializer_list>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <lexer/dfa.h>
-#include <lexer/state.h>
+#include <symbol.h>
 
-namespace fs = std::filesystem;
-
-// Resolve a fixture file living under tests/fixtures
-std::string fixture_path(const std::string &name)
+namespace
 {
-    fs::path base = fs::path(__FILE__).parent_path() / "fixtures" / name;
-    return base.string();
-}
+    namespace fs = std::filesystem;
 
-class DFATest : public ::testing::Test
-{
-protected:
-    DFA dfa;
-};
-
-// Test basic identifier recognition
-TEST_F(DFATest, ParseSimpleIdentifier)
-{
-    std::string filename = fixture_path("simple_identifier.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    // Should have: SOF, FLAP, IDENTIFIER, ASSIGN, NUMBER, PERIOD, EOF
-    EXPECT_GT(tokens.size(), 0);
-}
-
-// Test keyword recognition (FLAP)
-TEST_F(DFATest, RecognizeFlapKeyword)
-{
-    std::string filename = fixture_path("keyword_flap.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    // After processing, "flap" should be recognized as FLAP keyword
-    bool found_flap = false;
-    for (const auto &token : tokens)
+    std::string fixture_path(const std::string &name)
     {
-        if (token.token_type == FLAP && token.lexeme == "flap")
+        return (fs::path(__FILE__).parent_path() / "fixtures" / name).string();
+    }
+
+    void expect_tokens(const Tokens &actual,
+                       std::initializer_list<std::pair<Terminal, std::string>> expected)
+    {
+        ASSERT_EQ(actual.size(), expected.size());
+        size_t index = 0;
+        for (const auto &[type, lexeme] : expected)
         {
-            found_flap = true;
-            break;
+            EXPECT_EQ(actual[index].token_type, type) << "token index " << index;
+            EXPECT_EQ(actual[index].lexeme, lexeme) << "token index " << index;
+            ++index;
         }
     }
-    EXPECT_TRUE(found_flap);
-}
 
-// Test keyword recognition (START)
-TEST_F(DFATest, RecognizeStartKeyword)
-{
-    std::string filename = fixture_path("keyword_start.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    bool found_start = false;
-    for (const auto &token : tokens)
+    size_t count_token(const Tokens &tokens, Terminal type)
     {
-        if (token.token_type == START && token.lexeme == "start")
-        {
-            found_start = true;
-            break;
-        }
+        return static_cast<size_t>(std::count_if(tokens.begin(), tokens.end(),
+                                                 [type](const LexerToken &token)
+                                                 { return token.token_type == type; }));
     }
-    EXPECT_TRUE(found_start);
-}
 
-// Test keyword recognition (END)
-TEST_F(DFATest, RecognizeEndKeyword)
-{
-    std::string filename = fixture_path("keyword_end.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    bool found_end = false;
-    for (const auto &token : tokens)
+    bool contains_subsequence(const Tokens &tokens,
+                              std::initializer_list<Terminal> expected)
     {
-        if (token.token_type == END && token.lexeme == "end")
+        if (expected.size() > tokens.size())
+            return false;
+
+        for (size_t start = 0; start + expected.size() <= tokens.size(); ++start)
         {
-            found_end = true;
-            break;
+            size_t offset = 0;
+            bool matches = true;
+            for (Terminal type : expected)
+            {
+                if (tokens[start + offset].token_type != type)
+                {
+                    matches = false;
+                    break;
+                }
+                ++offset;
+            }
+            if (matches)
+                return true;
         }
+        return false;
     }
-    EXPECT_TRUE(found_end);
-}
 
-// Test number recognition
-TEST_F(DFATest, RecognizeNumbers)
-{
-    std::string filename = fixture_path("numbers.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    // Count number tokens
-    int number_count = 0;
-    for (const auto &token : tokens)
+    class DFATest : public ::testing::Test
     {
-        if (token.token_type == NUMBER)
+    protected:
+        Tokens lex(const std::string &fixture)
         {
-            number_count++;
+            dfa.parse(fixture_path(fixture));
+            return dfa.get_result();
         }
-    }
-    EXPECT_EQ(number_count, 3);
+
+        DFA dfa;
+    };
 }
 
-// Test assignment operator
-TEST_F(DFATest, RecognizeAssignmentOperator)
+TEST_F(DFATest, TokenizesDeclarationExactly)
 {
-    std::string filename = fixture_path("assignment.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    bool found_assign = false;
-    for (const auto &token : tokens)
-    {
-        if (token.token_type == ASSIGN)
-        {
-            found_assign = true;
-            break;
-        }
-    }
-    EXPECT_TRUE(found_assign);
+    expect_tokens(lex("simple_identifier.goose"), {
+                                                        {FLAP, "flap"},
+                                                        {IDENTIFIER, "myVar"},
+                                                        {ASSIGN, "="},
+                                                        {NUMBER_LITERAL, "5"},
+                                                        {PERIOD, "."},
+                                                    });
 }
 
-// Test period (statement terminator)
-TEST_F(DFATest, RecognizePeriod)
+TEST_F(DFATest, RecognizesLanguageKeywords)
 {
-    std::string filename = fixture_path("period.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    bool found_period = false;
-    for (const auto &token : tokens)
-    {
-        if (token.token_type == PERIOD)
-        {
-            found_period = true;
-            break;
-        }
-    }
-    EXPECT_TRUE(found_period);
+    expect_tokens(lex("keyword_flap.goose"), {{FLAP, "flap"}});
+    expect_tokens(lex("keyword_start.goose"), {{START, "start"}});
+    expect_tokens(lex("keyword_end.goose"), {{END, "end"}});
 }
 
-// Test function decorator (@)
-TEST_F(DFATest, RecognizeFunctionDecorator)
+TEST_F(DFATest, DistinguishesNumberLiteralsFromNumberTypeKeyword)
 {
-    std::string filename = fixture_path("func_decorator.goose");
+    expect_tokens(lex("numbers.goose"), {
+                                            {NUMBER_LITERAL, "42"},
+                                            {NUMBER_LITERAL, "123"},
+                                            {NUMBER_LITERAL, "999"},
+                                        });
 
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    // Should contain FUNC_AT tokens
-    int func_at_count = 0;
-    for (const auto &token : tokens)
-    {
-        if (token.token_type == FUNC_AT)
-        {
-            func_at_count++;
-        }
-    }
-    EXPECT_EQ(func_at_count, 2); // @ at both sides
+    const auto tokens = lex("function_calls_and_arithmetic.goose");
+    EXPECT_EQ(count_token(tokens, NUMBER), 2u);
+    EXPECT_GT(count_token(tokens, NUMBER_LITERAL), 2u);
 }
 
-// Test parameter brackets << >>
-TEST_F(DFATest, RecognizeParameterBrackets)
+TEST_F(DFATest, RecognizesAssignmentPeriodAndFunctionDecorator)
 {
-    std::string filename = fixture_path("param_open.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    bool found_open = false;
-    for (const auto &token : tokens)
-    {
-        if (token.token_type == ARG_OPEN_PAREN)
-        {
-            found_open = true;
-            break;
-        }
-    }
-    EXPECT_TRUE(found_open);
+    expect_tokens(lex("assignment.goose"), {
+                                               {IDENTIFIER, "x"},
+                                               {ASSIGN, "="},
+                                               {NUMBER_LITERAL, "10"},
+                                           });
+    expect_tokens(lex("period.goose"), {
+                                           {IDENTIFIER, "x"},
+                                           {ASSIGN, "="},
+                                           {NUMBER_LITERAL, "10"},
+                                           {PERIOD, "."},
+                                       });
+    expect_tokens(lex("func_decorator.goose"), {
+                                                   {FUNC_AT, "@"},
+                                                   {IDENTIFIER, "myFunc"},
+                                                   {FUNC_AT, "@"},
+                                               });
 }
 
-// Test comma separator
-TEST_F(DFATest, RecognizeComma)
+TEST_F(DFATest, RecognizesCallDelimitersExactly)
 {
-    std::string filename = fixture_path("comma.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    int comma_count = 0;
-    for (const auto &token : tokens)
-    {
-        if (token.token_type == COMMA)
-        {
-            comma_count++;
-        }
-    }
-    EXPECT_EQ(comma_count, 2);
+    expect_tokens(lex("consecutive_operators.goose"), {
+                                                          {ARG_OPEN_PAREN, "<<"},
+                                                          {ARG_CLOSE_PAREN, ">>"},
+                                                      });
 }
 
-// Test string with quotes
-TEST_F(DFATest, RecognizeQuotedString)
+TEST_F(DFATest, RecognizesStringsAndCommaSeparatedValues)
 {
-    std::string filename = fixture_path("quoted_string.goose");
+    const auto string_tokens = lex("quoted_string.goose");
+    ASSERT_EQ(count_token(string_tokens, STRING_LITERAL), 1u);
 
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    bool found_quote = false;
-    for (const auto &token : tokens)
-    {
-        if (token.token_type == STRING_LITERAL)
-        {
-            found_quote = true;
-            break;
-        }
-    }
-    EXPECT_TRUE(found_quote);
+    const auto comma_tokens = lex("comma.goose");
+    EXPECT_EQ(count_token(comma_tokens, COMMA), 2u);
 }
 
-// Test comment removal
-TEST_F(DFATest, RemoveComments)
+TEST_F(DFATest, RemovesCommentsAndWhitespaceTokens)
 {
-    std::string filename = fixture_path("comment.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    // Comments should be removed, so no COMMENT tokens after removal
-    for (const auto &token : tokens)
+    const auto comment_tokens = lex("comment.goose");
+    for (const auto &token : comment_tokens)
     {
         EXPECT_NE(token.token_type, COMMENT);
+        EXPECT_NE(token.token_type, SPACES);
     }
+
+    const auto whitespace_tokens = lex("whitespace.goose");
+    EXPECT_EQ(count_token(whitespace_tokens, IDENTIFIER), 3u);
+    EXPECT_EQ(count_token(whitespace_tokens, SPACES), 0u);
 }
 
-// Test complex program structure
-TEST_F(DFATest, ParseComplexProgram)
+TEST_F(DFATest, TokenizesFunctionParametersCallsGroupingAndArithmetic)
 {
-    std::string filename = fixture_path("complex_program.goose");
+    const auto tokens = lex("function_calls_and_arithmetic.goose");
 
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
+    EXPECT_EQ(count_token(tokens, START), 2u);
+    EXPECT_EQ(count_token(tokens, END), 2u);
+    EXPECT_EQ(count_token(tokens, OPEN_PAREN), 3u);
+    EXPECT_EQ(count_token(tokens, CLOSE_PAREN), 3u);
+    EXPECT_EQ(count_token(tokens, ARG_OPEN_PAREN), 3u);
+    EXPECT_EQ(count_token(tokens, ARG_CLOSE_PAREN), 3u);
+    EXPECT_EQ(count_token(tokens, RETURN), 1u);
+    EXPECT_EQ(count_token(tokens, PLUS), 2u);
+    EXPECT_EQ(count_token(tokens, MINUS), 1u);
+    EXPECT_EQ(count_token(tokens, TIMES), 1u);
+    EXPECT_EQ(count_token(tokens, DIVIDE), 1u);
+    EXPECT_EQ(count_token(tokens, MOD), 1u);
 
-    // Verify we have tokens and they include key elements
-    EXPECT_GT(tokens.size(), 0);
-
-    bool has_start = false, has_flap = false, has_honk = false, has_end = false;
-    for (const auto &token : tokens)
-    {
-        if (token.token_type == START)
-            has_start = true;
-        if (token.token_type == FLAP)
-            has_flap = true;
-        if (token.token_type == END)
-            has_end = true;
-    }
-
-    EXPECT_TRUE(has_start);
-    EXPECT_TRUE(has_flap);
-    EXPECT_TRUE(has_end);
+    EXPECT_TRUE(contains_subsequence(tokens, {START, FUNC_AT, IDENTIFIER, FUNC_AT,
+                                              OPEN_PAREN, NUMBER, IDENTIFIER, COMMA,
+                                              NUMBER, IDENTIFIER, CLOSE_PAREN}));
+    EXPECT_TRUE(contains_subsequence(tokens, {IDENTIFIER, ARG_OPEN_PAREN,
+                                              NUMBER_LITERAL, COMMA, NUMBER_LITERAL,
+                                              TIMES, OPEN_PAREN}));
+    EXPECT_TRUE(contains_subsequence(tokens, {IDENTIFIER, ARG_OPEN_PAREN,
+                                              STRING_LITERAL, COMMA, IDENTIFIER,
+                                              COMMA, IDENTIFIER, ARG_OPEN_PAREN}));
 }
 
-// Test file not found error
+TEST_F(DFATest, TokenizesUpdatedComplexProgram)
+{
+    const auto tokens = lex("complex_program.goose");
+    EXPECT_TRUE(contains_subsequence(tokens, {START, FUNC_AT, IDENTIFIER, FUNC_AT,
+                                              OPEN_PAREN, CLOSE_PAREN}));
+    EXPECT_TRUE(contains_subsequence(tokens, {IDENTIFIER, ARG_OPEN_PAREN,
+                                              STRING_LITERAL, COMMA, IDENTIFIER,
+                                              ARG_CLOSE_PAREN, PERIOD}));
+}
+
+TEST_F(DFATest, RecognizesMultipleIdentifiers)
+{
+    EXPECT_EQ(count_token(lex("multiple_identifiers.goose"), IDENTIFIER), 3u);
+}
+
 TEST_F(DFATest, FileNotFoundThrowsError)
 {
     EXPECT_THROW(dfa.parse("/nonexistent/file.goose"), std::runtime_error);
-}
-
-// Test multiple identifiers
-TEST_F(DFATest, ParseMultipleIdentifiers)
-{
-    std::string filename = fixture_path("multiple_identifiers.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    // Count identifier tokens
-    int identifier_count = 0;
-    for (const auto &token : tokens)
-    {
-        if (token.token_type == IDENTIFIER)
-        {
-            identifier_count++;
-        }
-    }
-    EXPECT_EQ(identifier_count, 3);
-}
-
-// Test whitespace handling
-TEST_F(DFATest, WhitespaceTokens)
-{
-    std::string filename = fixture_path("whitespace.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    // Should have multiple tokens (at least identifiers and spaces/separators)
-    EXPECT_GT(tokens.size(), 1);
-
-    // Verify we have identifiers
-    int identifier_count = 0;
-    for (const auto &token : tokens)
-    {
-        if (token.token_type == IDENTIFIER)
-        {
-            identifier_count++;
-        }
-    }
-    EXPECT_EQ(identifier_count, 3);
-}
-
-// Test consecutive operators
-TEST_F(DFATest, ConsecutiveOperators)
-{
-    std::string filename = fixture_path("consecutive_operators.goose");
-
-    dfa.parse(filename);
-    auto tokens = dfa.get_result();
-
-    bool has_open = false, has_close = false;
-    for (const auto &token : tokens)
-    {
-        if (token.token_type == ARG_OPEN_PAREN)
-            has_open = true;
-        if (token.token_type == ARG_CLOSE_PAREN)
-            has_close = true;
-    }
-
-    EXPECT_TRUE(has_open);
-    EXPECT_TRUE(has_close);
-}
-
-int main(int argc, char **argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
