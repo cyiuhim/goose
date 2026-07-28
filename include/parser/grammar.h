@@ -20,7 +20,8 @@ inline Grammar goose_grammar = {
     {FUNC_CALL_STATEMENT, {{ARG_OPEN_PAREN, ARGS, ARG_CLOSE_PAREN}}},
     {RETURN_STATEMENT, {{RETURN, EXPR}}},
     // EXPR -> TERM | TERM + EXPR | TERM - EXPR
-    // to make things right associative, we flatten each level after the first level of the tree made from a chain of +/- to be + TERM or - TERM
+    // to make things left associative, we flatten each level after the first level of the tree made from a chain of +/- to be + TERM or - TERM
+    // then during tree transformation we traverse down the tree in order
     {EXPR, {{TERM, EXPR_TAIL}}},
     {EXPR_TAIL, {{EPSILON}, {PLUS, TERM, EXPR_TAIL}, {MINUS, TERM, EXPR_TAIL}}},
     // TERM -> FACTOR | FACTOR * TERM | FACTOR / TERM | FACTOR % TERM
