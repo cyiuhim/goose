@@ -33,7 +33,7 @@ namespace
     {
         if (parser_table.contains({non_terminal, terminal}))
         {
-            std::cerr << "Parser table already contains entry at: {" << non_terminal << ", " << terminal << "}" << std::endl;
+            std::cerr << "Parser table already contains entry at: {" << to_string(non_terminal) << ", " << to_string(terminal) << "}" << std::endl;
             throw std::runtime_error("Parser error");
         }
         parser_table[{non_terminal, terminal}] = grammar_rule;
@@ -311,7 +311,7 @@ void LLParser::validate_grammar()
                 {
                     if (predict_set_2.contains(predict_st))
                     {
-                        throw std::runtime_error(std::format("Error in validating grammar, non-terminal involved: {}, with rules {} and {}", static_cast<int>(non_terminal), i, j));
+                        throw std::runtime_error(std::format("Error in validating grammar, non-terminal involved: {}, with rules {} and {}", to_string(non_terminal), i, j));
                     }
                 }
             }

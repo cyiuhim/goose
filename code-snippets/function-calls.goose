@@ -14,5 +14,5 @@ start @fly@ ()
 honk_something<<"long long man", 8>>.
 flap a = 3.
 flap b = 5.
-honk<<a, " plus ", b, " is ", addition(a,b)>>.
+honk<<a, " plus ", b, " is ", addition<<a,b>> >>.
 end @fly@
