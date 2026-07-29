@@ -14,7 +14,7 @@ public:
     std::unique_ptr<ProgramNode> transform(const ParserNode &parse_tree);
 
 private:
-    std::unique_ptr<FunctionNode> transform_function(const ParserNode &parse_tree);
+    std::unique_ptr<FunctionDfnNode> transform_function(const ParserNode &parse_tree);
     std::unique_ptr<StatementNode> transform_statement(const ParserNode &parse_tree);
     std::unique_ptr<AssignStatementNode> transform_declare_statement(const ParserNode &parse_tree);
     std::unique_ptr<AssignStatementNode> transform_assign_statement(const ParserNode &parse_tree, const std::string &identifier);

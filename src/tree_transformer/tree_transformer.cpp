@@ -32,9 +32,9 @@ std::unique_ptr<ProgramNode> TreeTransformer::transform(const ParserNode &parse_
  * STATEMENTS -> STATEMENT STATEMENTS | EPSILON
  */
 
-std::unique_ptr<FunctionNode> TreeTransformer::transform_function(const ParserNode &parse_tree)
+std::unique_ptr<FunctionDfnNode> TreeTransformer::transform_function(const ParserNode &parse_tree)
 {
-    auto result = std::make_unique<FunctionNode>();
+    auto result = std::make_unique<FunctionDfnNode>();
     const ParserNode &func_dfn_node = parse_tree;
     ParserNode &statement_node = *func_dfn_node.children[4];
     while (statement_node.children.size() > 1)
