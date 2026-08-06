@@ -58,6 +58,40 @@ target_include_directories(goose_parser
         ${CMAKE_CURRENT_SOURCE_DIR}/include/parser
 )
 
+add_library(goose_ast_nodes
+    src/ast_nodes/program_node.cpp
+    src/ast_nodes/function_node.cpp
+    src/ast_nodes/statement_node.cpp
+)
+
+target_link_libraries(goose_ast_nodes
+    PUBLIC
+        goose_common
+)
+
+target_include_directories(goose_ast_nodes
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/ast_nodes
+)
+
+add_library(goose_tree_transformer
+    src/tree_transformer/tree_transformer.cpp
+)
+
+target_link_libraries(goose_tree_transformer
+    PUBLIC
+        goose_ast_nodes
+        goose_parser
+)
+
+target_include_directories(goose_tree_transformer
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/ast_nodes
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/tree_transformer
+)
+
 add_executable(goose
     src/main.cpp
 )
@@ -66,6 +100,7 @@ target_link_libraries(goose
     PRIVATE
         goose_lexer
         goose_parser
+        goose_tree_transformer
 )
 
 target_include_directories(goose

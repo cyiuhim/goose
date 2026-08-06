@@ -2,12 +2,11 @@
 #define __STATEMENT_NODE_H__
 
 #include <ast_node.h>
-#include <variant>
-#include <vector>
-#include <string>
+#include <expr_node.h>
 
-class ExprNode;
-class FuncCallNode;
+#include <memory>
+#include <string>
+#include <utility>
 
 class StatementNode : public ASTNode
 {
@@ -19,10 +18,9 @@ class AssignStatementNode final : public StatementNode
 public:
     AssignStatementNode(std::string identifier,
                         std::unique_ptr<ExprNode> expression,
-                        bool is_declare) : identifier{std::move(identifier)},
-                                           expression{std::move(expression)},
-                                           is_declare{is_declare} {}
-    void accept(Visitor *visitor);
+                        bool is_declare);
+    ~AssignStatementNode() override;
+    void accept(Visitor *visitor) override;
 
 private:
     std::string identifier;
@@ -33,9 +31,9 @@ private:
 class FuncCallStatementNode final : public StatementNode
 {
 public:
-    FuncCallStatementNode(std::unique_ptr<FuncCallNode> func_call)
-        : func_call{std::move(func_call)} {}
-    void accept(Visitor *visitor);
+    FuncCallStatementNode(std::unique_ptr<FuncCallNode> func_call);
+    ~FuncCallStatementNode() override;
+    void accept(Visitor *visitor) override;
 
 private:
     std::unique_ptr<FuncCallNode> func_call;
@@ -44,9 +42,9 @@ private:
 class ReturnStatementNode final : public StatementNode
 {
 public:
-    ReturnStatementNode(std::unique_ptr<ExprNode> return_val)
-        : return_val{std::move(return_val)} {}
-    void accept(Visitor *visitor);
+    ReturnStatementNode(std::unique_ptr<ExprNode> return_val);
+    ~ReturnStatementNode() override;
+    void accept(Visitor *visitor) override;
 
 private:
     std::unique_ptr<ExprNode> return_val;

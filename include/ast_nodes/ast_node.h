@@ -6,6 +6,7 @@ class Visitor;
 class ASTNode
 {
 public:
+    virtual ~ASTNode() = default;
     virtual void accept(Visitor *visitor) = 0;
 };
 

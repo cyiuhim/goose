@@ -5,6 +5,7 @@
 #include <lexer/dfa.h>
 #include <parser/parser.h>
 #include <parser/grammar.h>
+#include <tree_transformer/tree_transformer.h>
 
 int main(int argc, char *argv[])
 {
@@ -47,6 +48,19 @@ int main(int argc, char *argv[])
     }
 
     std::unique_ptr<ParserNode> parse_tree = parser.get_result();
+
+    // stage 3: tree transformer
+    TreeTransformer transformer;
+    std::unique_ptr<ProgramNode> ast;
+    try
+    {
+        ast = transformer.transform_program(*parse_tree);
+    }
+    catch (std::runtime_error &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return 4;
+    }
 
     return 0;
 }
