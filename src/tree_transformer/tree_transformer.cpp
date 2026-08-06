@@ -1,7 +1,7 @@
-#include <tree_transformer.h>
-#include <program_node.h>
-#include <statement_node.h>
-#include <function_node.h>
+#include <tree_transformer/tree_transformer.h>
+#include <ast_nodes/program_node.h>
+#include <ast_nodes/statement_node.h>
+#include <ast_nodes/function_node.h>
 
 #include <format>
 #include <utility>
@@ -13,7 +13,6 @@
  * START -> FUNC_DFNS
  * FUNC_DFNS -> FUNC_DFN FUNC_DFNS | EPSILON
  */
-
 std::unique_ptr<ProgramNode> TreeTransformer::transform_program(const ParserNode &parse_tree)
 {
     const ParserNode &start_node = parse_tree;
@@ -35,7 +34,6 @@ std::unique_ptr<ProgramNode> TreeTransformer::transform_program(const ParserNode
  * STATEMENTS -> STATEMENT STATEMENTS | EPSILON
  * PARAMS -> PARAM PARAMS_TAIL | EPSILON
  */
-
 std::unique_ptr<FunctionDfnNode> TreeTransformer::transform_function(const ParserNode &parse_tree)
 {
     const ParserNode &func_dfn_node = parse_tree;
@@ -74,7 +72,6 @@ std::unique_ptr<FunctionDfnNode> TreeTransformer::transform_function(const Parse
  * PARAMS -> PARAM PARAMS_TAIL | EPSILON
  * PARAMS_TAIL -> COMMA PARAM PARAMS_TAIL | EPSILON
  */
-
 std::vector<FunctionParameter> TreeTransformer::transform_params(const ParserNode &parse_tree)
 {
     // TODO: implement
@@ -88,7 +85,6 @@ std::vector<FunctionParameter> TreeTransformer::transform_params(const ParserNod
  * PARAM -> TYPE_NAME IDENTIFIER
  * TYPE_NAME -> NUMBER | WORD
  */
-
 FunctionParameter transform_param(const ParserNode &parse_tree)
 {
     // TODO: implement
@@ -103,7 +99,6 @@ FunctionParameter transform_param(const ParserNode &parse_tree)
  * RAW_STATEMENT -> DECLARE_STATEMENT | IDENTIFIER ID_START_STATEMENT | RETURN_STATEMENT
  * ID_START_STATEMENT -> ASSIGN_STATEMENT | FUNC_CALL_STATEMENT
  */
-
 std::unique_ptr<StatementNode> TreeTransformer::transform_statement(const ParserNode &parse_tree)
 {
     const ParserNode &statement_node = parse_tree;
@@ -150,7 +145,6 @@ std::unique_ptr<StatementNode> TreeTransformer::transform_statement(const Parser
  * grammar rules:
  * DECLARE_STATEMENT -> FLAP IDENTIFIER ASSIGN EXPR
  */
-
 std::unique_ptr<AssignStatementNode> TreeTransformer::transform_declare_statement(const ParserNode &parse_tree)
 {
     // TODO: implement
@@ -163,7 +157,6 @@ std::unique_ptr<AssignStatementNode> TreeTransformer::transform_declare_statemen
  * grammar rules:
  * ASSIGN_STATEMENT -> ASSIGN EXPR
  */
-
 std::unique_ptr<AssignStatementNode> TreeTransformer::transform_assign_statement(
     const ParserNode &parse_tree,
     const std::string identifier)
@@ -178,7 +171,6 @@ std::unique_ptr<AssignStatementNode> TreeTransformer::transform_assign_statement
  * grammar rules:
  * FUNC_CALL_STATEMENT -> ARG_OPEN_PAREN ARGS ARG_CLOSE_PAREN
  */
-
 std::unique_ptr<FuncCallStatementNode> TreeTransformer::transform_func_call_statement(
     const ParserNode &parse_tree,
     const std::string identifier)
@@ -193,7 +185,6 @@ std::unique_ptr<FuncCallStatementNode> TreeTransformer::transform_func_call_stat
  * grammar rules:
  * RETURN_STATEMENT -> RETURN EXPr
  */
-
 std::unique_ptr<ReturnStatementNode> TreeTransformer::transform_return_statement(const ParserNode &parse_tree)
 {
     // TODO: implement
@@ -207,7 +198,6 @@ std::unique_ptr<ReturnStatementNode> TreeTransformer::transform_return_statement
  * ARGS -> ARG ARGS_TAIL | EPSILON
  * ARG -> EXPR
  */
-
 std::vector<std::unique_ptr<ExprNode>> TreeTransformer::transform_args(const ParserNode &parse_tree)
 {
     // TODO: implement
@@ -221,7 +211,6 @@ std::vector<std::unique_ptr<ExprNode>> TreeTransformer::transform_args(const Par
  * EXPR -> TERM EXPR_TAIL
  * EXPR_TAIL -> EPSILON | PLUS TERM EXPR_TAIL | MINUS TERM EXPR_TAIL
  */
-
 std::unique_ptr<ExprNode> TreeTransformer::transform_expr(const ParserNode &parse_tree)
 {
     // TODO: implement
@@ -235,7 +224,6 @@ std::unique_ptr<ExprNode> TreeTransformer::transform_expr(const ParserNode &pars
  * TERM -> FACTOR TERM_TAIL
  * TERM_TAIL -> EPSILON | TIMES FACTOR TERM_TAIL | DIVIDE FACTOR TERM_TAIL | MOD FACTOR TERM_TAIL
  */
-
 std::unique_ptr<ExprNode> TreeTransformer::transform_term(const ParserNode &parse_tree)
 {
     // TODO: implement
@@ -249,7 +237,6 @@ std::unique_ptr<ExprNode> TreeTransformer::transform_term(const ParserNode &pars
  * FACTOR -> NUMBER_LITERAL | STRING_LITERAL | IDENTIFIER FACTOR_TAIL | OPEN_PAREN EXPR CLOSE_PAREN
  * FACTOR_TAIL -> EPSILON | ARG_OPEN_PAREN ARGS ARG_CLOSE_PAREN
  */
-
 std::unique_ptr<ExprNode> TreeTransformer::transform_factor(const ParserNode &parse_tree)
 {
     // TODO: implement

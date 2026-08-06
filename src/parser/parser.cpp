@@ -256,7 +256,6 @@ void LLParser::compute_follow_table()
  * validate whether the grammar is LL(1) compatible
  * PRE: compute_first_table and compute_follow_table are executed
  */
-
 void LLParser::validate_grammar()
 {
 
@@ -324,7 +323,6 @@ void LLParser::validate_grammar()
  * PRE: compute_first_table and compute_follow_table are executed
  *
  */
-
 void LLParser::compute_parser_table()
 {
 
@@ -382,7 +380,6 @@ void LLParser::compute_parser_table()
  * takes the output from the lexer in the form of tokens, and construct the parse tree
  * PRE: compute_parser_table is executed (which it is, by the constructor of LLParser)
  */
-
 void LLParser::parse(const Tokens &tokens)
 {
 

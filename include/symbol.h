@@ -143,8 +143,8 @@ inline std::string to_string(NonTerminal non_terminal)
     return non_terminal_strings.at(non_terminal);
 }
 
-typedef std::variant<NonTerminal, Terminal> SymbolType;
-typedef std::vector<SymbolType> Expansion;
+using SymbolType = std::variant<NonTerminal, Terminal>;
+using Expansion = std::vector<SymbolType>;
 
 struct LexerToken
 {
@@ -154,6 +154,6 @@ struct LexerToken
     unsigned int char_no;
 };
 
-typedef std::vector<LexerToken> Tokens;
+using Tokens = std::vector<LexerToken>;
 
 #endif

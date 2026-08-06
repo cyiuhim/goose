@@ -5,7 +5,7 @@
 
 #include <unordered_map>
 
-typedef std::unordered_map<NonTerminal, std::vector<Expansion>> Grammar;
+using Grammar = std::unordered_map<NonTerminal, std::vector<Expansion>>;
 
 inline Grammar goose_grammar = {
     {START_SYMBOL, {{FUNC_DFNS}}},

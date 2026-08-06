@@ -8,8 +8,8 @@
 #include <map>
 #include <unordered_set>
 
-typedef std::map<NonTerminal, std::unordered_set<Terminal>> SymbolMappingTable;
-typedef std::map<std::pair<NonTerminal, Terminal>, std::pair<NonTerminal, Expansion>> ParserTable;
+using SymbolMappingTable = std::map<NonTerminal, std::unordered_set<Terminal>>;
+using ParserTable = std::map<std::pair<NonTerminal, Terminal>, std::pair<NonTerminal, Expansion>>;
 
 class LLParser
 {
