@@ -1,13 +1,13 @@
 CXX=g++
 CXXFLAGS= -std=c++20 -Wall -g -MMD
 EXEC=../goose
-INCLUDES=-I../include -I../include/lexer -I../include/parser
+INCLUDES=-I../include -I../include/ast_nodes -I../include/lexer -I../include/parser -I../include/tree_transformer
 
 CPPFILES=$(wildcard *.cpp)
 OBJECTS=${CPPFILES:.cpp=.o}
 DEPENDS=${CPPFILES:.cpp=.d}
 
-SUBDIRS = lexer parser
+SUBDIRS = lexer parser ast_nodes tree_transformer
 SUBOBJS = $(addsuffix .o, $(SUBDIRS))
 
 .PHONY: all clean ${SUBDIRS}

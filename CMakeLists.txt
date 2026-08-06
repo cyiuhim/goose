@@ -82,7 +82,6 @@ add_library(goose_tree_transformer
 target_link_libraries(goose_tree_transformer
     PUBLIC
         goose_ast_nodes
-        goose_parser
 )
 
 target_include_directories(goose_tree_transformer
