@@ -37,19 +37,21 @@ std::function<bool(char)> build_transition_function(std::string transition_chars
     };
 }
 
-PrimitiveType symbol_to_primitive_type(SymbolType st) 
+PrimitiveType symbol_to_primitive_type(SymbolType st)
 {
-    if (!std::holds_alternative<Terminal>(st)) {
-        throw std::runtime_error(std::format("Called symbol_to_primitive_type with non terminal symbol: {}", to_string(std::get<NonTerminal> (st))));
+    if (!std::holds_alternative<Terminal>(st))
+    {
+        throw std::runtime_error(std::format("Called symbol_to_primitive_type with non terminal symbol: {}", to_string(std::get<NonTerminal>(st))));
     }
-    switch (std::get<Terminal> (st)) {
-        case WORD:
+    switch (std::get<Terminal>(st))
+    {
+    case WORD:
         return Word;
         break;
-        case NUMBER:
+    case NUMBER:
         return Number;
         break;
-        default:
+    default:
         throw std::runtime_error(std::format("Called symbol_to_primitive_type with invalid terminal symbol: {}", to_string(std::get<Terminal>(st))));
     }
 }
