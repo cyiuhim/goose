@@ -30,7 +30,7 @@ public:
           op{op}
     {
     }
-    void accept(Visitor *visitor);
+    void accept(Visitor *visitor) override;
 
 private:
     std::unique_ptr<ExprNode> left_child;
@@ -47,11 +47,44 @@ public:
           args{std::move(args)}
     {
     }
-    void accept(Visitor *visitor);
+    void accept(Visitor *visitor) override;
 
 private:
     std::string func_name;
     std::vector<std::unique_ptr<ExprNode>> args;
+};
+
+class NumberLiteralNode final : public ExprNode 
+{
+public: 
+    NumberLiteralNode(int val) : val{val} {}
+
+    void accept(Visitor *visitor) override;
+
+private:
+    int val;
+};
+
+class StringLiteralNode final : public ExprNode 
+{
+public: 
+    StringLiteralNode(std::string val) : val{std::move(val)} {}
+
+    void accept(Visitor *visitor) override;
+
+private:
+    std::string val;
+};
+
+class IdentifierNode final : public ExprNode 
+{
+public: 
+    IdentifierNode(std::string identifier_name) : identifier_name{std::move(identifier_name)} {}
+
+    void accept(Visitor *visitor) override;
+
+private: 
+    std::string identifier_name;
 };
 
 #endif

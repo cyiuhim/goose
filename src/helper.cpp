@@ -1,5 +1,9 @@
+#include "symbol.h"
+#include "type.h"
 #include <helper.h>
-#include <ranges>
+
+#include <format>
+#include <variant>
 
 std::string join(const std::vector<std::string> &vec,
                  bool add_quotes,
@@ -31,4 +35,21 @@ std::function<bool(char)> build_transition_function(std::string transition_chars
     {
         return std::ranges::find(transition_chars, c) != transition_chars.end();
     };
+}
+
+PrimitiveType symbol_to_primitive_type(SymbolType st) 
+{
+    if (!std::holds_alternative<Terminal>(st)) {
+        throw std::runtime_error(std::format("Called symbol_to_primitive_type with non terminal symbol: {}", to_string(std::get<NonTerminal> (st))));
+    }
+    switch (std::get<Terminal> (st)) {
+        case WORD:
+        return Word;
+        break;
+        case NUMBER:
+        return Number;
+        break;
+        default:
+        throw std::runtime_error(std::format("Called symbol_to_primitive_type with invalid terminal symbol: {}", to_string(std::get<Terminal>(st))));
+    }
 }

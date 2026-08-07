@@ -62,6 +62,7 @@ add_library(goose_ast_nodes
     src/ast_nodes/program_node.cpp
     src/ast_nodes/function_node.cpp
     src/ast_nodes/statement_node.cpp
+    src/ast_nodes/expr_node.cpp
 )
 
 target_link_libraries(goose_ast_nodes
