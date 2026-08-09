@@ -445,7 +445,13 @@ void LLParser::parse(const Tokens &tokens)
                         expected_terminals.push_back(to_string(terminal));
                     }
                 }
-                throw std::runtime_error(std::format("Unexpected symbol: {} at line {} char {}, possible: {}", to_string(cur_token.token_type), cur_token.line_no, cur_token.char_no, join(expected_terminals)));
+                throw std::runtime_error(
+                    std::format(
+                        "Unexpected symbol: {} at line {} char {}, possible: {}",
+                        to_string(cur_token.token_type),
+                        cur_token.line_no,
+                        cur_token.char_no,
+                        join(expected_terminals, true)));
             }
             const auto &[_, expansion] = parser_table.at({top_non_terminal, cur_token.token_type});
             for (const SymbolType expansion_symbol : expansion | std::views::reverse)

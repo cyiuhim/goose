@@ -81,6 +81,7 @@ void ASTPrinter::visit(BinExprNode &bin_expr_node)
     std::string right_child_string = this->result;
     std::string op_string = bin_op_to_string(bin_expr_node.op);
     std::string bin_expr_string = std::format("({} {} {})", op_string, left_child_string, right_child_string);
+    this->result = bin_expr_string;
 }
 
 // (func-call identifier arg1 arg2 ...)
@@ -95,7 +96,7 @@ void ASTPrinter::visit(FuncCallNode &func_call_node)
     std::string func_call_string = std::format(
         "(func-call {} {})",
         func_call_node.func_name,
-        join(arg_strings));
+        join(arg_strings, false));
     this->result = func_call_string;
 }
 
@@ -108,11 +109,16 @@ void ASTPrinter::visit(NumberLiteralNode &number_literal_node)
 // "val"
 void ASTPrinter::visit(StringLiteralNode &string_literal_node)
 {
-    this->result = std::format("\"{}\"", string_literal_node.val);
+    this->result = std::format("{}", string_literal_node.val);
 }
 
 // identifier
 void ASTPrinter::visit(IdentifierNode &identifier_node)
 {
     this->result = identifier_node.identifier_name;
+}
+
+std::string ASTPrinter::get_result()
+{
+    return result;
 }

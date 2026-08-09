@@ -55,3 +55,8 @@ goose_add_test(parser_test
     SOURCES parser_test.cpp
     LIBS    goose_lexer goose_parser
 )
+
+goose_add_test(tree_transformer_test
+    SOURCES tree_transformer_test.cpp
+    LIBS    goose_lexer goose_parser goose_tree_transformer
+)
