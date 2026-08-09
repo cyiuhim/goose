@@ -16,4 +16,18 @@
 ## Statement
 
 - function calls, nested function calls
--
+- function calls with no parameters
+- function calls with one parameter
+- function calls with multiple parameters
+- difference between assign and declare statements
+- declare/assign a variable to a complex expression
+- return statements
+
+## Expressions
+
+- number literals
+- string literals
+- nested function calls
+- excessive parantheses
+- correct PEDMAS order
+- identifiers
