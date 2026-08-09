@@ -1,5 +1,6 @@
 #include <ast_nodes/function_node.h>
 #include <ast_nodes/statement_node.h>
+#include <visitor.h>
 
 FunctionDfnNode::FunctionDfnNode(std::string func_name,
                                  std::vector<FunctionParameter> parameters,
@@ -14,5 +15,5 @@ FunctionDfnNode::~FunctionDfnNode() = default;
 
 void FunctionDfnNode::accept(Visitor *visitor)
 {
-    // TODO: implement
+    visitor->visit(*this);
 }

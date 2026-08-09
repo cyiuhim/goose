@@ -1,6 +1,6 @@
 #include <expr_node.h>
 #include <statement_node.h>
-#include <semantic_analyzer/visitor.h>
+#include <visitor.h>
 
 #include <utility>
 
@@ -18,7 +18,7 @@ AssignStatementNode::~AssignStatementNode() = default;
 
 void AssignStatementNode::accept(Visitor *visitor)
 {
-    // TODO: implement
+    visitor->visit(*this);
 }
 
 FuncCallStatementNode::FuncCallStatementNode(
@@ -31,7 +31,7 @@ FuncCallStatementNode::~FuncCallStatementNode() = default;
 
 void FuncCallStatementNode::accept(Visitor *visitor)
 {
-    // TODO: implement
+    visitor->visit(*this);
 }
 
 ReturnStatementNode::ReturnStatementNode(
@@ -44,5 +44,5 @@ ReturnStatementNode::~ReturnStatementNode() = default;
 
 void ReturnStatementNode::accept(Visitor *visitor)
 {
-    // TODO: implement
+    visitor->visit(*this);
 }

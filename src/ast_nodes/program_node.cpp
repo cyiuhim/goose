@@ -1,5 +1,6 @@
 #include <ast_nodes/program_node.h>
 #include <ast_nodes/function_node.h>
+#include <visitor.h>
 
 ProgramNode::ProgramNode(std::vector<std::unique_ptr<FunctionDfnNode>> functions)
     : functions{std::move(functions)}
@@ -8,5 +9,5 @@ ProgramNode::ProgramNode(std::vector<std::unique_ptr<FunctionDfnNode>> functions
 
 void ProgramNode::accept(Visitor *visitor)
 {
-    // TODO: implement
+    visitor->visit(*this);
 }
