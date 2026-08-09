@@ -16,7 +16,7 @@ namespace
 
     std::string fixture_path(const std::string &name)
     {
-        return (fs::path(__FILE__).parent_path() / "fixtures" / name).string();
+        return (fs::path(__FILE__).parent_path() / "fixtures" / "lexer" / name).string();
     }
 
     void expect_tokens(const Tokens &actual,
@@ -80,12 +80,12 @@ namespace
 TEST_F(DFATest, TokenizesDeclarationExactly)
 {
     expect_tokens(lex("simple_identifier.goose"), {
-                                                        {FLAP, "flap"},
-                                                        {IDENTIFIER, "myVar"},
-                                                        {ASSIGN, "="},
-                                                        {NUMBER_LITERAL, "5"},
-                                                        {PERIOD, "."},
-                                                    });
+                                                      {FLAP, "flap"},
+                                                      {IDENTIFIER, "myVar"},
+                                                      {ASSIGN, "="},
+                                                      {NUMBER_LITERAL, "5"},
+                                                      {PERIOD, "."},
+                                                  });
 }
 
 TEST_F(DFATest, RecognizesLanguageKeywords)

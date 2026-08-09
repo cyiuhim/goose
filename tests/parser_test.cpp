@@ -22,7 +22,7 @@ namespace
 
     std::string fixture_path(const std::string &name)
     {
-        return (fs::path(__FILE__).parent_path() / "fixtures" / name).string();
+        return (fs::path(__FILE__).parent_path() / "fixtures" / "parser" / name).string();
     }
 
     Grammar simple_grammar()
