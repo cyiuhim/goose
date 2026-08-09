@@ -22,7 +22,6 @@ public:
     ~AssignStatementNode() override;
     void accept(Visitor *visitor) override;
 
-private:
     std::string identifier;
     std::unique_ptr<ExprNode> expression;
     bool is_declare;
@@ -35,7 +34,6 @@ public:
     ~FuncCallStatementNode() override;
     void accept(Visitor *visitor) override;
 
-private:
     std::unique_ptr<FuncCallNode> func_call;
 };
 
@@ -46,7 +44,6 @@ public:
     ~ReturnStatementNode() override;
     void accept(Visitor *visitor) override;
 
-private:
     std::unique_ptr<ExprNode> return_val;
 };
 

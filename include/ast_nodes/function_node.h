@@ -9,7 +9,7 @@
 
 struct FunctionParameter
 {
-    PrimitiveType type;
+    Type type;
     std::string identifier;
 };
 
@@ -24,7 +24,6 @@ public:
 
     void accept(Visitor *visitor) override;
 
-private:
     std::string func_name;
     std::vector<FunctionParameter> parameters;
     std::vector<std::unique_ptr<StatementNode>> statements;

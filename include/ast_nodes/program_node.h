@@ -12,7 +12,6 @@ public:
     ProgramNode(std::vector<std::unique_ptr<FunctionDfnNode>> functions);
     void accept(Visitor *visitor);
 
-private:
     std::vector<std::unique_ptr<FunctionDfnNode>> functions;
 };
 

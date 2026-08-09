@@ -363,7 +363,7 @@ std::unique_ptr<ExprNode> TreeTransformer::transform_factor(const ParserNode &pa
         switch (std::get<Terminal>(literal_node.symbol_type))
         {
         case NUMBER_LITERAL:
-            return std::make_unique<NumberLiteralNode>(stoi(literal_node.lexeme.value()));
+            return std::make_unique<NumberLiteralNode>(stoll(literal_node.lexeme.value()));
             break;
         case STRING_LITERAL:
             return std::make_unique<StringLiteralNode>(literal_node.lexeme.value());

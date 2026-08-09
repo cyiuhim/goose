@@ -1,7 +1,7 @@
 #ifndef __EXPR_NODE_H__
 #define __EXPR_NODE_H__
 
-#include <ast_node.h>
+#include <ast_nodes/ast_node.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -32,7 +32,6 @@ public:
     }
     void accept(Visitor *visitor) override;
 
-private:
     std::unique_ptr<ExprNode> left_child;
     std::unique_ptr<ExprNode> right_child;
     BinOp op;
@@ -49,7 +48,6 @@ public:
     }
     void accept(Visitor *visitor) override;
 
-private:
     std::string func_name;
     std::vector<std::unique_ptr<ExprNode>> args;
 };
@@ -57,12 +55,11 @@ private:
 class NumberLiteralNode final : public ExprNode
 {
 public:
-    NumberLiteralNode(int val) : val{val} {}
+    explicit NumberLiteralNode(long long val) : val{val} {}
 
     void accept(Visitor *visitor) override;
 
-private:
-    int val;
+    long long val;
 };
 
 class StringLiteralNode final : public ExprNode
@@ -72,7 +69,6 @@ public:
 
     void accept(Visitor *visitor) override;
 
-private:
     std::string val;
 };
 
@@ -83,7 +79,6 @@ public:
 
     void accept(Visitor *visitor) override;
 
-private:
     std::string identifier_name;
 };
 

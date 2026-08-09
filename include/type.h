@@ -7,4 +7,8 @@ enum PrimitiveType
     Word
 };
 
+// extendable in the future, if supporting more types, can change this
+// this will trigger compile time checks
+using Type = PrimitiveType;
+
 #endif

@@ -78,6 +78,7 @@ target_include_directories(goose_ast_nodes
 
 add_library(goose_tree_transformer
     src/tree_transformer/tree_transformer.cpp
+    src/tree_transformer/ast_printer.cpp
 )
 
 target_link_libraries(goose_tree_transformer

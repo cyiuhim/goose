@@ -55,3 +55,48 @@ PrimitiveType symbol_to_primitive_type(SymbolType st)
         throw std::runtime_error(std::format("Called symbol_to_primitive_type with invalid terminal symbol: {}", to_string(std::get<Terminal>(st))));
     }
 }
+
+std::string type_to_string(Type type)
+{
+    switch (type)
+    {
+    case Word:
+        return "Word";
+        break;
+    case Number:
+        return "Number";
+        break;
+    }
+}
+
+void replace_one_instance(std::string &str,
+                          const std::string &from,
+                          const std::string &to)
+{
+    size_t pos = str.find(from);
+    if (pos == std::string::npos)
+        return;
+    str.replace(pos, from.length(), to);
+}
+
+std::string bin_op_to_string(BinOp op)
+{
+    switch (op)
+    {
+    case Add:
+        return "+";
+        break;
+    case Subtract:
+        return "-";
+        break;
+    case Multiply:
+        return "*";
+        break;
+    case Divide:
+        return "/";
+        break;
+    case Mod:
+        return "%";
+        break;
+    }
+}
