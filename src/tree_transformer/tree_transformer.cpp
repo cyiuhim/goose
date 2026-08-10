@@ -339,7 +339,7 @@ std::unique_ptr<ExprNode> TreeTransformer::transform_term(const ParserNode &pars
         }
 
         const ParserNode &right_term_node = *term_tail_node->children[1];
-        std::unique_ptr<ExprNode> right_term_ast = transform_term(right_term_node);
+        std::unique_ptr<ExprNode> right_term_ast = transform_factor(right_term_node);
         factor_ast = std::make_unique<BinExprNode>(std::move(factor_ast), std::move(right_term_ast), op);
 
         term_tail_node = term_tail_node->children[2].get();

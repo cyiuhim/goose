@@ -62,6 +62,7 @@ public:
     long long val;
 };
 
+// NOTE: the val contains the double quotes before and after the string literal
 class StringLiteralNode final : public ExprNode
 {
 public:
