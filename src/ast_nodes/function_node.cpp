@@ -4,10 +4,12 @@
 
 FunctionDfnNode::FunctionDfnNode(std::string func_name,
                                  std::vector<FunctionParameter> parameters,
-                                 std::vector<std::unique_ptr<StatementNode>> statements)
+                                 std::vector<std::unique_ptr<StatementNode>> statements,
+                                 std::optional<Type> return_type)
     : func_name{std::move(func_name)},
       parameters{std::move(parameters)},
-      statements{std::move(statements)}
+      statements{std::move(statements)},
+      return_type{std::move(return_type)}
 {
 }
 

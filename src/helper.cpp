@@ -56,6 +56,11 @@ PrimitiveType symbol_to_primitive_type(SymbolType st)
     }
 }
 
+bool symbol_equals_terminal(SymbolType st, Terminal terminal)
+{
+    return std::holds_alternative<Terminal>(st) && std::get<Terminal>(st) == terminal;
+}
+
 std::string type_to_string(Type type)
 {
     switch (type)

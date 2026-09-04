@@ -4,6 +4,8 @@
 #include <ast_nodes/statement_node.h>
 #include <ast_nodes/function_node.h>
 #include <ast_nodes/expr_node.h>
+
+#include <parser/grammar.h>
 #include <helper.h>
 
 #include <format>
@@ -33,17 +35,19 @@ std::unique_ptr<ProgramNode> TreeTransformer::transform_program(const ParserNode
  * transform a tree rooted at the FUNC_DFN node into an AST rooted at a function node
  * PRE: parse tree is rooted at FUNC_DFN
  * grammar rules:
- * FUNC_DFN -> START FUNC_AT IDENTIFIER FUNC_AT OPEN_PAREN PARAMS CLOSE_PAREN STATEMENTS END FUNC_AT IDENTIFIER FUNC_AT
+ * FUNC_DFN -> START FUNC_AT IDENTIFIER FUNC_AT OPEN_PAREN PARAMS CLOSE_PAREN OPTIONAL_RETURN_TAIL STATEMENTS END FUNC_AT IDENTIFIER FUNC_AT
+ * OPTIONAL_RETURN_TAIL -> SINGLE_ARROW TYPE_NAME | EPSILON
  * STATEMENTS -> STATEMENT STATEMENTS | EPSILON
  * PARAMS -> PARAM PARAMS_TAIL | EPSILON
  */
 std::unique_ptr<FunctionDfnNode> TreeTransformer::transform_function(const ParserNode &parse_tree)
 {
+    // TODO: can we do something about the magic numbers in this function definition? as well as the ones below, regarding indices in grammar
     const ParserNode &func_dfn_node = parse_tree;
 
     // parse function name
     const ParserNode &start_identifier_node = *func_dfn_node.children[2];
-    const ParserNode &end_identifier_node = *func_dfn_node.children[10];
+    const ParserNode &end_identifier_node = *func_dfn_node.children[11];
     const std::string start_func_name = start_identifier_node.lexeme.value();
     const std::string end_func_name = end_identifier_node.lexeme.value();
     if (start_identifier_node.lexeme != end_identifier_node.lexeme)
@@ -56,16 +60,28 @@ std::unique_ptr<FunctionDfnNode> TreeTransformer::transform_function(const Parse
     const auto parameters = transform_params(params_node);
 
     // parse statements
-    ParserNode *statement_node = func_dfn_node.children[7].get();
+    ParserNode *statement_node = func_dfn_node.children[8].get();
     std::vector<std::unique_ptr<StatementNode>> statement_children;
     while (statement_node->children.size() > 1)
     {
         statement_children.push_back(transform_statement(*statement_node->children[0]));
         statement_node = statement_node->children[1].get();
     }
+
+    // parse return type tail
+    const ParserNode &optional_return_tail_node = *func_dfn_node.children[10];
+
+    std::optional<Type> type;
+    if (optional_return_tail_node.children.size() == 2)
+    {
+        const ParserNode &type_name_node = *optional_return_tail_node.children[1];
+        type = transform_type_name(type_name_node);
+    }
+
     return std::make_unique<FunctionDfnNode>(std::move(start_func_name),
                                              std::move(parameters),
-                                             std::move(statement_children));
+                                             std::move(statement_children),
+                                             std::move(type));
 }
 
 /*
@@ -98,7 +114,6 @@ std::vector<FunctionParameter> TreeTransformer::transform_params(const ParserNod
  * PRE: parse_tree is rooted at the PARAM node
  * grammar rules:
  * PARAM -> TYPE_NAME IDENTIFIER
- * TYPE_NAME -> NUMBER | WORD
  */
 FunctionParameter TreeTransformer::transform_param(const ParserNode &parse_tree)
 {
@@ -106,8 +121,7 @@ FunctionParameter TreeTransformer::transform_param(const ParserNode &parse_tree)
 
     // get the type
     const ParserNode &type_name_node = *param_node.children[0];
-    const ParserNode &type_node = *type_name_node.children[0];
-    const auto type = symbol_to_primitive_type(type_node.symbol_type);
+    Type type = transform_type_name(type_name_node);
 
     // get the identifier
     const ParserNode &identifier_node = *param_node.children[1];
@@ -391,4 +405,18 @@ std::unique_ptr<ExprNode> TreeTransformer::transform_factor(const ParserNode &pa
     }
     const ParserNode &expr_node = *factor_node.children[1];
     return transform_expr(expr_node);
+}
+
+/*
+ * transform a tree rooted at TYPE_NAME node into its corresponding type name
+ * PRE: parse_tree rooted at TYPE_NAME node
+ * grammar rules:
+ * TYPE_NAME -> NUMBER | WORD
+ */
+
+Type TreeTransformer::transform_type_name(const ParserNode &parse_tree)
+{
+    const ParserNode &type_name_node = parse_tree;
+    const ParserNode &type_node = *type_name_node.children[0];
+    return symbol_to_primitive_type(type_node.symbol_type);
 }

@@ -18,7 +18,8 @@ class FunctionDfnNode final : public ASTNode
 public:
     FunctionDfnNode(std::string func_name,
                     std::vector<FunctionParameter> parameters,
-                    std::vector<std::unique_ptr<StatementNode>> statements);
+                    std::vector<std::unique_ptr<StatementNode>> statements,
+                    std::optional<Type> return_type = std::nullopt);
 
     ~FunctionDfnNode() override;
 
@@ -27,6 +28,7 @@ public:
     std::string func_name;
     std::vector<FunctionParameter> parameters;
     std::vector<std::unique_ptr<StatementNode>> statements;
+    std::optional<Type> return_type;
 };
 
 #endif

@@ -1,4 +1,4 @@
-start @increment@ (number n)
+start @increment@ (number n) -> number
 return n+1.
 end @increment@
 

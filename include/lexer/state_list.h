@@ -28,6 +28,7 @@ inline State space_state;
 inline State double_quote_state;
 inline State quote_end_state;
 inline State comma_state;
+inline State single_arrow_state;
 inline State plus_state;
 inline State minus_state;
 inline State asterisk_state;
@@ -87,6 +88,7 @@ inline Transition transitions[] = {
     {&empty_state, &asterisk_state, build_transition_function("*")},
     {&empty_state, &slash_state, build_transition_function("/")},
     {&empty_state, &percent_state, build_transition_function("%")},
+    {&minus_state, &single_arrow_state, build_transition_function(">")},
 };
 
 void populate_state_list();
@@ -111,7 +113,8 @@ inline std::vector<std::pair<State *, Terminal>> goose_accepting_state_map = {
     {&minus_state, MINUS},
     {&asterisk_state, TIMES},
     {&slash_state, DIVIDE},
-    {&percent_state, MOD}};
+    {&percent_state, MOD},
+    {&single_arrow_state, SINGLE_ARROW}};
 
 inline std::vector<std::pair<std::string, Terminal>> goose_keywords = {
     {"flap", FLAP},

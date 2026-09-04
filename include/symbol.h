@@ -33,6 +33,7 @@ enum NonTerminal
     PARAMS_TAIL,
     PARAM,
     TYPE_NAME,
+    OPTIONAL_RETURN_TAIL,
 
     // end of non-terminals
     END_NON_TERMINALS
@@ -58,6 +59,7 @@ enum Terminal
     TIMES,           // *
     DIVIDE,          // /
     MOD,             // %
+    SINGLE_ARROW,    // ->
 
     // keywords
     FLAP,   // flap (let)
@@ -102,7 +104,8 @@ static std::unordered_map<NonTerminal, std::string> non_terminal_strings = {
     {PARAMS, "PARAMS"},
     {PARAMS_TAIL, "PARAMS_TAIL"},
     {PARAM, "PARAM"},
-    {TYPE_NAME, "TYPE_NAME"}};
+    {TYPE_NAME, "TYPE_NAME"},
+    {OPTIONAL_RETURN_TAIL, "OPTIONAL_RETURN_TAIL"}};
 
 /*
  * for purposes of error messages only, so that we're not printing out a number for the enum but rather mapped to the token types
@@ -124,6 +127,7 @@ static std::unordered_map<Terminal, std::string> terminal_strings = {
     {TIMES, "*"},
     {DIVIDE, "/"},
     {MOD, "%"},
+    {SINGLE_ARROW, "->"},
     {FLAP, "flap"},
     {START, "start"},
     {END, "end"},

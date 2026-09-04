@@ -502,6 +502,10 @@ TEST(ParserParse, EmptyFunctionIncludesEmptyParameterList)
                                     CLOSE_PAREN,
                                     ")"),
                                 expect_node(
+                                    OPTIONAL_RETURN_TAIL,
+                                    {expect_token(
+                                        EPSILON)}),
+                                expect_node(
                                     STATEMENTS,
                                     {expect_token(
                                         EPSILON)}),

@@ -29,6 +29,7 @@ private:
     std::unique_ptr<ExprNode> transform_expr(const ParserNode &parse_tree);
     std::unique_ptr<ExprNode> transform_term(const ParserNode &parse_tree);
     std::unique_ptr<ExprNode> transform_factor(const ParserNode &parse_tree);
+    Type transform_type_name(const ParserNode &parse_tree);
 };
 
 #endif

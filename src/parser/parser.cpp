@@ -38,11 +38,6 @@ namespace
         }
         parser_table[{non_terminal, terminal}] = grammar_rule;
     }
-
-    bool symbol_equals_terminal(SymbolType st, Terminal terminal)
-    {
-        return std::holds_alternative<Terminal>(st) && std::get<Terminal>(st) == terminal;
-    }
 }
 
 LLParser::LLParser(const Grammar &grammar) : grammar{grammar}
