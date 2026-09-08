@@ -7,10 +7,13 @@
 AssignStatementNode::AssignStatementNode(
     std::string identifier,
     std::unique_ptr<ExprNode> expression,
-    bool is_declare)
+    bool is_declare,
+    unsigned int line_no,
+    unsigned int char_no)
     : identifier{std::move(identifier)},
       expression{std::move(expression)},
-      is_declare{is_declare}
+      is_declare{is_declare},
+      StatementNode{line_no, char_no}
 {
 }
 
@@ -22,8 +25,11 @@ void AssignStatementNode::accept(Visitor *visitor)
 }
 
 FuncCallStatementNode::FuncCallStatementNode(
-    std::unique_ptr<FuncCallNode> func_call)
-    : func_call{std::move(func_call)}
+    std::unique_ptr<FuncCallNode> func_call,
+    unsigned int line_no,
+    unsigned int char_no)
+    : func_call{std::move(func_call)},
+      StatementNode{line_no, char_no}
 {
 }
 
@@ -35,8 +41,11 @@ void FuncCallStatementNode::accept(Visitor *visitor)
 }
 
 ReturnStatementNode::ReturnStatementNode(
-    std::unique_ptr<ExprNode> return_val)
-    : return_val{std::move(return_val)}
+    std::unique_ptr<ExprNode> return_val,
+    unsigned int line_no,
+    unsigned int char_no)
+    : return_val{std::move(return_val)},
+      StatementNode{line_no, char_no}
 {
 }
 

@@ -8,6 +8,9 @@
 
 class ExprNode : public ASTNode
 {
+protected:
+    ExprNode(unsigned int line_no, unsigned int char_no)
+        : ASTNode{line_no, char_no} {}
 };
 
 enum BinOp
@@ -24,10 +27,13 @@ class BinExprNode final : public ExprNode
 public:
     BinExprNode(std::unique_ptr<ExprNode> left_child,
                 std::unique_ptr<ExprNode> right_child,
-                BinOp op)
+                BinOp op,
+                unsigned int line_no,
+                unsigned int char_no)
         : left_child{std::move(left_child)},
           right_child{std::move(right_child)},
-          op{op}
+          op{op},
+          ExprNode{line_no, char_no}
     {
     }
     void accept(Visitor *visitor) override;
@@ -41,9 +47,12 @@ class FuncCallNode final : public ExprNode
 {
 public:
     FuncCallNode(std::string func_name,
-                 std::vector<std::unique_ptr<ExprNode>> args)
+                 std::vector<std::unique_ptr<ExprNode>> args,
+                 unsigned int line_no,
+                 unsigned int char_no)
         : func_name{std::move(func_name)},
-          args{std::move(args)}
+          args{std::move(args)},
+          ExprNode{line_no, char_no}
     {
     }
     void accept(Visitor *visitor) override;
@@ -55,18 +64,25 @@ public:
 class NumberLiteralNode final : public ExprNode
 {
 public:
-    explicit NumberLiteralNode(long long val) : val{val} {}
+    explicit NumberLiteralNode(long long val,
+                               unsigned int line_no,
+                               unsigned int char_no)
+        : val{val}, ExprNode{line_no, char_no} {}
 
     void accept(Visitor *visitor) override;
 
     long long val;
 };
 
+// TODO: when changing the standard, remove this comment
 // NOTE: the val contains the double quotes before and after the string literal
 class StringLiteralNode final : public ExprNode
 {
 public:
-    StringLiteralNode(std::string val) : val{std::move(val)} {}
+    StringLiteralNode(std::string val,
+                      unsigned int line_no,
+                      unsigned int char_no)
+        : val{std::move(val)}, ExprNode{line_no, char_no} {}
 
     void accept(Visitor *visitor) override;
 
@@ -76,7 +92,11 @@ public:
 class IdentifierNode final : public ExprNode
 {
 public:
-    IdentifierNode(std::string identifier_name) : identifier_name{std::move(identifier_name)} {}
+    IdentifierNode(std::string identifier_name,
+                   unsigned int line_no,
+                   unsigned int char_no)
+        : identifier_name{std::move(identifier_name)},
+          ExprNode{line_no, char_no} {}
 
     void accept(Visitor *visitor) override;
 

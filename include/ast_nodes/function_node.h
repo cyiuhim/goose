@@ -19,6 +19,8 @@ public:
     FunctionDfnNode(std::string func_name,
                     std::vector<FunctionParameter> parameters,
                     std::vector<std::unique_ptr<StatementNode>> statements,
+                    unsigned int line_no,
+                    unsigned int char_no,
                     std::optional<Type> return_type = std::nullopt);
 
     ~FunctionDfnNode() override;

@@ -81,6 +81,8 @@ std::unique_ptr<FunctionDfnNode> TreeTransformer::transform_function(const Parse
     return std::make_unique<FunctionDfnNode>(std::move(start_func_name),
                                              std::move(parameters),
                                              std::move(statement_children),
+                                             func_dfn_node.line_no,
+                                             func_dfn_node.char_no,
                                              std::move(type));
 }
 
@@ -195,7 +197,11 @@ std::unique_ptr<AssignStatementNode> TreeTransformer::transform_declare_statemen
     const ParserNode &expr_node = *declare_statement_node.children[3];
     std::unique_ptr<ExprNode> expr_ast = transform_expr(expr_node);
 
-    return std::make_unique<AssignStatementNode>(std::move(identifier), std::move(expr_ast), true);
+    return std::make_unique<AssignStatementNode>(std::move(identifier),
+                                                 std::move(expr_ast),
+                                                 true,
+                                                 declare_statement_node.line_no,
+                                                 declare_statement_node.char_no);
 }
 
 /*
@@ -214,7 +220,11 @@ std::unique_ptr<AssignStatementNode> TreeTransformer::transform_assign_statement
     const ParserNode &expr_node = *assign_statement_node.children[1];
     std::unique_ptr<ExprNode> expr_ast = transform_expr(expr_node);
 
-    return std::make_unique<AssignStatementNode>(std::move(identifier), std::move(expr_ast), false);
+    return std::make_unique<AssignStatementNode>(std::move(identifier),
+                                                 std::move(expr_ast),
+                                                 false,
+                                                 assign_statement_node.line_no,
+                                                 assign_statement_node.char_no);
 }
 
 /*
@@ -231,9 +241,14 @@ std::unique_ptr<FuncCallStatementNode> TreeTransformer::transform_func_call_stat
     const ParserNode &args_node = *func_call_statement_node.children[1];
     auto args_ast = transform_args(args_node);
 
-    auto func_call_node = std::make_unique<FuncCallNode>(std::move(identifier), std::move(args_ast));
+    auto func_call_node = std::make_unique<FuncCallNode>(std::move(identifier),
+                                                         std::move(args_ast),
+                                                         func_call_statement_node.line_no,
+                                                         func_call_statement_node.char_no);
 
-    return std::make_unique<FuncCallStatementNode>(std::move(func_call_node));
+    return std::make_unique<FuncCallStatementNode>(std::move(func_call_node),
+                                                   func_call_statement_node.line_no,
+                                                   func_call_statement_node.char_no);
 }
 
 /*
@@ -247,7 +262,9 @@ std::unique_ptr<ReturnStatementNode> TreeTransformer::transform_return_statement
     const ParserNode &return_statement_node = parse_tree;
     const ParserNode &expr_node = *return_statement_node.children[1];
     auto expr_ast = transform_expr(expr_node);
-    return std::make_unique<ReturnStatementNode>(std::move(expr_ast));
+    return std::make_unique<ReturnStatementNode>(std::move(expr_ast),
+                                                 return_statement_node.line_no,
+                                                 return_statement_node.char_no);
 }
 
 /*
@@ -290,8 +307,8 @@ std::vector<std::unique_ptr<ExprNode>> TreeTransformer::transform_args(const Par
 std::unique_ptr<ExprNode> TreeTransformer::transform_expr(const ParserNode &parse_tree)
 {
     const ParserNode &expr_node = parse_tree;
-    ParserNode *term_node = expr_node.children[0].get();
-    std::unique_ptr<ExprNode> term_ast = transform_term(*term_node);
+    const ParserNode &term_node = *expr_node.children[0];
+    std::unique_ptr<ExprNode> term_ast = transform_term(term_node);
 
     ParserNode *expr_tail_node = expr_node.children[1].get();
     while (expr_tail_node->children.size() > 1)
@@ -312,7 +329,11 @@ std::unique_ptr<ExprNode> TreeTransformer::transform_expr(const ParserNode &pars
 
         const ParserNode &right_term_node = *expr_tail_node->children[1];
         std::unique_ptr<ExprNode> right_term_ast = transform_term(right_term_node);
-        term_ast = std::make_unique<BinExprNode>(std::move(term_ast), std::move(right_term_ast), op);
+        term_ast = std::make_unique<BinExprNode>(std::move(term_ast),
+                                                 std::move(right_term_ast),
+                                                 op,
+                                                 term_node.line_no,
+                                                 term_node.char_no);
 
         expr_tail_node = expr_tail_node->children[2].get();
     }
@@ -329,8 +350,8 @@ std::unique_ptr<ExprNode> TreeTransformer::transform_expr(const ParserNode &pars
 std::unique_ptr<ExprNode> TreeTransformer::transform_term(const ParserNode &parse_tree)
 {
     const ParserNode &term_node = parse_tree;
-    ParserNode *factor_node = term_node.children[0].get();
-    std::unique_ptr<ExprNode> factor_ast = transform_factor(*factor_node);
+    const ParserNode &factor_node = *term_node.children[0];
+    std::unique_ptr<ExprNode> factor_ast = transform_factor(factor_node);
 
     ParserNode *term_tail_node = term_node.children[1].get();
     while (term_tail_node->children.size() > 1)
@@ -354,7 +375,11 @@ std::unique_ptr<ExprNode> TreeTransformer::transform_term(const ParserNode &pars
 
         const ParserNode &right_term_node = *term_tail_node->children[1];
         std::unique_ptr<ExprNode> right_term_ast = transform_factor(right_term_node);
-        factor_ast = std::make_unique<BinExprNode>(std::move(factor_ast), std::move(right_term_ast), op);
+        factor_ast = std::make_unique<BinExprNode>(std::move(factor_ast),
+                                                   std::move(right_term_ast),
+                                                   op,
+                                                   factor_node.line_no,
+                                                   factor_node.char_no);
 
         term_tail_node = term_tail_node->children[2].get();
     }
@@ -377,10 +402,15 @@ std::unique_ptr<ExprNode> TreeTransformer::transform_factor(const ParserNode &pa
         switch (std::get<Terminal>(literal_node.symbol_type))
         {
         case NUMBER_LITERAL:
-            return std::make_unique<NumberLiteralNode>(stoll(literal_node.lexeme.value()));
+            return std::make_unique<NumberLiteralNode>(stoll(literal_node.lexeme.value()),
+                                                       factor_node.line_no,
+                                                       factor_node.char_no);
             break;
         case STRING_LITERAL:
-            return std::make_unique<StringLiteralNode>(literal_node.lexeme.value());
+            // TODO: strip the opening and closing double quotes
+            return std::make_unique<StringLiteralNode>(literal_node.lexeme.value(),
+                                                       factor_node.line_no,
+                                                       factor_node.char_no);
             break;
         default:
             throw std::runtime_error(std::format("invalid terminal symbol when transforming factor: {}", to_string(std::get<Terminal>(literal_node.symbol_type))));
@@ -395,13 +425,18 @@ std::unique_ptr<ExprNode> TreeTransformer::transform_factor(const ParserNode &pa
         const ParserNode &factor_tail_node = *factor_node.children[1];
         if (factor_tail_node.children.size() == 1)
         {
-            return std::make_unique<IdentifierNode>(std::move(identifier_name));
+            return std::make_unique<IdentifierNode>(std::move(identifier_name),
+                                                    factor_node.line_no,
+                                                    factor_node.char_no);
         }
 
         const ParserNode &args_node = *factor_tail_node.children[1];
         auto args_ast = transform_args(args_node);
 
-        return std::make_unique<FuncCallNode>(std::move(identifier_name), std::move(args_ast));
+        return std::make_unique<FuncCallNode>(std::move(identifier_name),
+                                              std::move(args_ast),
+                                              factor_node.line_no,
+                                              factor_node.char_no);
     }
     const ParserNode &expr_node = *factor_node.children[1];
     return transform_expr(expr_node);
