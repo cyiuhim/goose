@@ -43,6 +43,9 @@ function(goose_add_test name)
 
     add_executable(${name} ${ARG_SOURCES})
     target_link_libraries(${name} PRIVATE ${ARG_LIBS} GTest::gtest_main)
+    set_property(TARGET ${name} APPEND PROPERTY
+        BUILD_RPATH "$<TARGET_FILE_DIR:GTest::gtest_main>"
+    )
     add_test(NAME ${name} COMMAND ${name})
 endfunction()
 

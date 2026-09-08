@@ -1,6 +1,6 @@
-goose
-**/*.d
-**/*.o
-build/
-tests/lexer_test
+/build*/
+/goose
+*.o
+*.d
+/CMakeUserPresets.json
 .vscode/

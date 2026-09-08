@@ -74,20 +74,43 @@ More examples live in [`code-snippets/`](code-snippets/).
 
 ## Build
 
-Requires a C++20 compiler, CMake 3.20 or newer, and LLVM.
+Requires a C++20 compiler, CMake 3.20 or newer, and LLVM. The checked-in CMake presets keep all generated files under `build/`.
+
+For a development build with tests enabled:
+
+```bash
+cmake --preset dev
+cmake --build --preset dev
+```
+
+The compiler is written to `build/dev/goose`. The compatibility wrapper runs the same commands:
 
 ```bash
 sh compile.sh
 ```
 
-This configures the project, builds it, and installs the `goose` binary. To build manually:
+For an optimized build without tests:
 
 ```bash
-cmake -S . -B build
-cmake --build build
+cmake --preset release
+cmake --build --preset release
+```
+
+Installation is optional and uses an explicit, unprivileged prefix:
+
+```bash
+cmake --install build/release --prefix "$HOME/.local"
 ```
 
 ## Usage
+
+Run a development build directly:
+
+```bash
+./build/dev/goose path/to/program.goose
+```
+
+If installed to a directory on `PATH`:
 
 ```bash
 goose path/to/program.goose
@@ -95,7 +118,15 @@ goose path/to/program.goose
 
 ## Tests
 
-The lexer and parser are covered by unit tests (via CTest) with a suite of `.goose` fixtures exercising tokenization and grammar edge cases.
+The lexer, parser, and tree transformer are covered by CTest unit tests with a suite of `.goose` fixtures exercising tokenization and grammar edge cases.
+
+```bash
+cmake --preset dev
+cmake --build --preset dev
+ctest --preset dev
+```
+
+The test wrapper invokes the same workflow:
 
 ```bash
 sh test.sh
@@ -105,12 +136,16 @@ sh test.sh
 
 ```
 goose/
+├── CMakeLists.txt          # project configuration and top-level orchestration
+├── CMakePresets.json       # shared development and release workflows
 ├── include/                # public headers
 │   ├── lexer/              # DFA, states, transition table, keyword trie
 │   ├── parser/             # LL(1) parser, grammar definition
-│   ├── tree_transformer/   # AST node definitions
-│   └── semantic_analyzer/  # visitor interface
-├── src/                    # implementations mirroring include/
+│   ├── ast_nodes/          # AST node definitions
+│   ├── tree_transformer/   # parse-tree to AST transformation
+│   └── semantic_analyzer/  # semantic analysis interface
+├── src/                    # implementations and production target definitions
+│   └── CMakeLists.txt
 ├── tests/                  # unit tests + .goose fixtures
 └── code-snippets/          # example Goose programs
 ```

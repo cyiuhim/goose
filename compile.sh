@@ -1,4 +1,5 @@
-rm -rf build
-cmake -S . -B build
-cmake --build build
-sudo cmake --install build --prefix /usr/local
+#!/bin/sh
+set -eu
+
+cmake --preset dev
+cmake --build --preset dev
