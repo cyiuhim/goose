@@ -28,7 +28,12 @@ struct FunctionType : public Type
 
 struct TypeTable
 {
+    std::string scope_name;
+
+    // this map includes the types of local variables, including function names
     std::unordered_map<std::string, Type> types;
+
+    // this map provides the tree structured for the nested symbol tables
     std::unordered_map<std::string, std::unique_ptr<TypeTable>> sub_function_tables;
 };
 

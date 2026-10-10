@@ -74,4 +74,8 @@ void TypeCheckVisitor::visit(StringLiteralNode &string_literal_node)
  */
 void TypeCheckVisitor::visit(IdentifierNode &identifier_node)
 {
+    for (int i = 0; i < (int)outside_type_tables.size(); i++)
+    {
+        for ()
+    }
 }

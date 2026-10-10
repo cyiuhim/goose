@@ -25,6 +25,9 @@ public:
 private:
     Type result;
     TypeTable type_table_result;
+
+    std::vector<TypeTable> outside_type_tables;
+    TypeTable cur_table;
 };
 
 #endif
