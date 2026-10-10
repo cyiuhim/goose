@@ -9,7 +9,7 @@ void SemanticAnalyzer::check_program(const std::unique_ptr<ProgramNode> ast)
     // check for fly function and its correctness on types
 }
 
-const ProgramTypeTable &SemanticAnalyzer::get_type_table()
+const TypeTable &SemanticAnalyzer::get_type_table()
 {
     return type_table;
 }

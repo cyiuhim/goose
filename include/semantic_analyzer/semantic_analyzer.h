@@ -13,10 +13,12 @@ class SemanticAnalyzer
 {
 public:
     void check_program(const std::unique_ptr<ProgramNode> ast);
-    const ProgramTypeTable &get_type_table();
+
+    // for passing into code generation
+    const TypeTable &get_type_table();
 
 private:
-    ProgramTypeTable type_table;
+    TypeTable type_table;
 };
 
 #endif

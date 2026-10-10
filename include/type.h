@@ -6,26 +6,30 @@
 #include <optional>
 #include <unordered_map>
 
-enum PrimitiveType
+struct Type
 {
-    Number,
-    Word
+public:
+    virtual ~Type() {}
 };
 
-// extendable in the future, if supporting more types, can change this
-// this will trigger compile time checks
-using Type = PrimitiveType;
-
-using FunctionType = std::pair<std::vector<Type>, std::optional<Type>>;
-
-using FunctionTypeTable = std::unordered_map<std::string, Type>;
-
-// so the ProgramTypeTable should be storing the types of functions with global scope
-// each function would be storing the names of the local variables (FunctionTypeTable)
-struct ProgramTypeTable
+struct PrimitiveType : public Type
 {
-    std::unordered_map<std::string, FunctionTypeTable> tables_per_function;
-    std::unordered_map<std::string, FunctionType> function_types;
+};
+
+inline PrimitiveType Number;
+inline PrimitiveType Word;
+
+// recursive type
+struct FunctionType : public Type
+{
+    std::vector<std::unique_ptr<Type>> parameters;
+    std::optional<std::unique_ptr<Type>> return_type;
+};
+
+struct TypeTable
+{
+    std::unordered_map<std::string, Type> types;
+    std::unordered_map<std::string, std::unique_ptr<TypeTable>> sub_function_tables;
 };
 
 #endif

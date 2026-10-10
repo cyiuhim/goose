@@ -1,6 +1,6 @@
 ## Semantics for the language Goose
 
-- Reference between functions is allowed, even forward references
+- Reference between functions is allowed, no forward references
 - Each program must have a main function, called fly, which must take in no arguments
 - For binary operations, only numbers can be operated on, with the exception of addition of words
 - No undefined references of variables or functions

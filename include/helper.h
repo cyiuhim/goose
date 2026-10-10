@@ -17,7 +17,7 @@ PrimitiveType symbol_to_primitive_type(SymbolType st);
 
 bool symbol_equals_terminal(SymbolType st, Terminal terminal);
 
-std::string type_to_string(Type type);
+std::string type_to_string(Type *type);
 
 void replace_one_instance(std::string &str, const std::string &from, const std::string &to);
 

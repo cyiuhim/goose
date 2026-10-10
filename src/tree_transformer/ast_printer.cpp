@@ -25,7 +25,7 @@ void ASTPrinter::visit(FunctionDfnNode &function_node)
     std::vector<std::string> param_strings;
     for (auto &[type, param_name] : function_node.parameters)
     {
-        std::string param_string = std::format("{} {}", type_to_string(type), param_name);
+        std::string param_string = std::format("{} {}", type_to_string(&type), param_name);
         param_strings.push_back(param_string);
     }
     std::vector<std::string> statement_strings;

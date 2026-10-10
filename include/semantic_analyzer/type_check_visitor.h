@@ -17,11 +17,14 @@ public:
     void visit(StringLiteralNode &string_literal_node) override;
     void visit(IdentifierNode &identifier_node) override;
 
-    Type get_result();
+    Type get_result()
+    {
+        return result;
+    }
 
 private:
     Type result;
-    FunctionTypeTable function_type_table_result;
+    TypeTable type_table_result;
 };
 
 #endif

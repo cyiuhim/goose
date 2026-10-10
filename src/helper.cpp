@@ -12,7 +12,7 @@ std::string join(const std::vector<std::string> &vec,
     if (vec.empty())
         return "";
     std::string result;
-    for (int i = 0; i < static_cast<int> (vec.size()) - 1; i++)
+    for (int i = 0; i < static_cast<int>(vec.size()) - 1; i++)
     {
         if (add_quotes)
             result += '\"';
@@ -61,17 +61,28 @@ bool symbol_equals_terminal(SymbolType st, Terminal terminal)
     return std::holds_alternative<Terminal>(st) && std::get<Terminal>(st) == terminal;
 }
 
-std::string type_to_string(Type type)
+std::string type_to_string(Type *type)
 {
-    switch (type)
+    if (!type)
     {
-    case Word:
-        return "Word";
-        break;
-    case Number:
-        return "Number";
-        break;
+        throw std::runtime_error("type_to_string called on nullptr");
     }
+    if (auto primitive_type = dynamic_cast<PrimitiveType *>(type))
+    {
+        if (primitive_type == &Number)
+            return "number";
+        return "word";
+    }
+    auto function_type = dynamic_cast<FunctionType *>(type);
+    std::vector<std::string> param_strings;
+    for (const auto &param : function_type->parameters)
+    {
+        param_strings.push_back(type_to_string(param.get()));
+    }
+    return std::format(
+        "({}) -> {}",
+        join(param_strings, false, ", "),
+        function_type->return_type ? type_to_string(function_type->return_type->get()) : "nothing");
 }
 
 void replace_one_instance(std::string &str,
