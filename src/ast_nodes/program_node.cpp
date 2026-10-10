@@ -3,7 +3,7 @@
 #include <visitor.h>
 
 ProgramNode::ProgramNode(std::vector<std::unique_ptr<FunctionDfnNode>> functions)
-    : functions{std::move(functions)}, ASTNode{0, 0}
+    : ASTNode{0, 0}, functions{std::move(functions)}
 {
 }
 

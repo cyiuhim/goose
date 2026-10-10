@@ -30,10 +30,10 @@ public:
                 BinOp op,
                 unsigned int line_no,
                 unsigned int char_no)
-        : left_child{std::move(left_child)},
+        : ExprNode{line_no, char_no},
+          left_child{std::move(left_child)},
           right_child{std::move(right_child)},
-          op{op},
-          ExprNode{line_no, char_no}
+          op{op}
     {
     }
     void accept(Visitor *visitor) override;
@@ -50,9 +50,9 @@ public:
                  std::vector<std::unique_ptr<ExprNode>> args,
                  unsigned int line_no,
                  unsigned int char_no)
-        : func_name{std::move(func_name)},
-          args{std::move(args)},
-          ExprNode{line_no, char_no}
+        : ExprNode{line_no, char_no},
+          func_name{std::move(func_name)},
+          args{std::move(args)}
     {
     }
     void accept(Visitor *visitor) override;
@@ -67,7 +67,7 @@ public:
     explicit NumberLiteralNode(long long val,
                                unsigned int line_no,
                                unsigned int char_no)
-        : val{val}, ExprNode{line_no, char_no} {}
+        : ExprNode{line_no, char_no}, val{val} {}
 
     void accept(Visitor *visitor) override;
 
@@ -82,7 +82,7 @@ public:
     StringLiteralNode(std::string val,
                       unsigned int line_no,
                       unsigned int char_no)
-        : val{std::move(val)}, ExprNode{line_no, char_no} {}
+        : ExprNode{line_no, char_no}, val{std::move(val)} {}
 
     void accept(Visitor *visitor) override;
 
@@ -95,8 +95,8 @@ public:
     IdentifierNode(std::string identifier_name,
                    unsigned int line_no,
                    unsigned int char_no)
-        : identifier_name{std::move(identifier_name)},
-          ExprNode{line_no, char_no} {}
+        : ExprNode{line_no, char_no},
+          identifier_name{std::move(identifier_name)} {}
 
     void accept(Visitor *visitor) override;
 

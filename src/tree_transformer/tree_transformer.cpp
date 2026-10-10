@@ -294,7 +294,7 @@ std::vector<std::unique_ptr<ExprNode>> TreeTransformer::transform_args(const Par
 
         args_tail_node = args_tail_node->children[2].get();
     }
-    return std::move(expr_asts);
+    return expr_asts;
 }
 
 /*

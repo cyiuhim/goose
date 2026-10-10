@@ -82,6 +82,7 @@ goose_enable_warnings(goose_tree_transformer)
 
 add_library(goose_semantic_analyzer
     semantic_analyzer/semantic_analyzer.cpp
+    semantic_analyzer/type_check_visitor.cpp
 )
 target_link_libraries(goose_semantic_analyzer
     PUBLIC

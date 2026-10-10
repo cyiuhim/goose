@@ -193,7 +193,7 @@ void LLParser::compute_follow_table()
         {
             for (const auto &expansion : expansions)
             {
-                for (int cur_idx = 0; cur_idx < expansion.size(); cur_idx++)
+                for (int cur_idx = 0; cur_idx < static_cast<int>(expansion.size()); cur_idx++)
                 {
                     const SymbolType cur_st = expansion[cur_idx];
 
@@ -205,7 +205,7 @@ void LLParser::compute_follow_table()
 
                     // checking if rule 3 can be applied while going through the symbols after cur_st
                     bool can_follow_empty = true;
-                    for (int follow_idx = cur_idx + 1; follow_idx < expansion.size(); follow_idx++)
+                    for (int follow_idx = cur_idx + 1; follow_idx < static_cast<int>(expansion.size()); follow_idx++)
                     {
                         const SymbolType follow_st = expansion[follow_idx];
 
@@ -295,9 +295,9 @@ void LLParser::validate_grammar()
             }
             predict_sets.push_back(std::move(cur_predict_set));
         }
-        for (int i = 0; i < predict_sets.size(); i++)
+        for (int i = 0; i < static_cast<int> (predict_sets.size()); i++)
         {
-            for (int j = i + 1; j < predict_sets.size(); j++)
+            for (int j = i + 1; j < static_cast<int>(predict_sets.size()); j++)
             {
                 const auto &predict_set_1 = predict_sets[i];
                 const auto &predict_set_2 = predict_sets[j];
@@ -403,7 +403,7 @@ void LLParser::parse(const Tokens &tokens)
     // continue until going through the whole stream of tokens
     // or throw an error if seeing missing entry in parser table or exhausted stream of tokens / symbol stack before the other one
 
-    while (token_idx < tokens.size())
+    while (token_idx < static_cast<int>(tokens.size()))
     {
         auto cur_token = tokens[token_idx];
         SymbolType top_symbol = symbol_stack.top();

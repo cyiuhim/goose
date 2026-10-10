@@ -8,11 +8,11 @@ FunctionDfnNode::FunctionDfnNode(std::string func_name,
                                  unsigned int line_no,
                                  unsigned int char_no,
                                  std::optional<Type> return_type)
-    : func_name{std::move(func_name)},
+    : ASTNode{line_no, char_no},
+      func_name{std::move(func_name)},
       parameters{std::move(parameters)},
       statements{std::move(statements)},
-      return_type{std::move(return_type)},
-      ASTNode{line_no, char_no}
+      return_type{std::move(return_type)}
 {
 }
 

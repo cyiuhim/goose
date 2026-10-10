@@ -12,7 +12,7 @@ std::string join(const std::vector<std::string> &vec,
     if (vec.empty())
         return "";
     std::string result;
-    for (int i = 0; i < vec.size() - 1; i++)
+    for (int i = 0; i < static_cast<int> (vec.size()) - 1; i++)
     {
         if (add_quotes)
             result += '\"';
